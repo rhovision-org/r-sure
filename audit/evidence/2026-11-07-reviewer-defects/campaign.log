@@ -1,0 +1,551 @@
+.venv/bin/python harness/run_suites.py --all
+--- root: pass (0) ---
+  ok resolve clock
+  ok resolve unknown
+  ok keys
+  ok keys include clock
+  ok nonce starts at zero
+  ok resolveMany
+  ok resolveMany has both keys
+  ok non-installer register
+  ok duplicate register
+  ok freeze below threshold
+  ok rotate below threshold
+RSURE_RESULT {"assertions": 11, "behaviours": {"SureRoot@\"freeze\"": ["refusal"], "SureRoot@\"keys\"": ["success"], "SureRoot@\"nonce\"": ["success"], "SureRoot@\"register\"": ["refusal"], "SureRoot@\"resolve\"": ["success", "refusal"], "SureRoot@\"resolveMany\"": ["success"], "SureRoot@\"rotate\"": ["refusal"]}, "covered_arms": ["SureRoot@\"resolve\"", "SureRoot@\"keys\"", "SureRoot@\"nonce\"", "SureRoot@\"resolveMany\"", "SureRoot@\"register\"", "SureRoot@\"freeze\"", "SureRoot@\"rotate\""], "failed": 0, "passed": 11, "suite": "root"}
+  wrote deployments/suite-result-root.json
+--- payments: pass (0) ---
+  ok health
+  ok health reports both rails
+  ok accountOf
+  ok accountOf has an account capability
+  ok depositFacet
+  ok issuer REV
+  ok issuer reply has brand and issuer
+  ok issuer unknown asset
+  ok ensureAccount
+  ok ensureAccount reply has account and owner
+  ok platformOwner
+RSURE_RESULT {"assertions": 11, "behaviours": {"Payments@\"accountOf\"": ["success"], "Payments@\"depositFacet\"": ["success"], "Payments@\"ensureAccount\"": ["success"], "Payments@\"health\"": ["success"], "Payments@\"issuer\"": ["success", "refusal"], "Payments@\"platformOwner\"": ["success"]}, "covered_arms": ["Payments@\"health\"", "Payments@\"accountOf\"", "Payments@\"depositFacet\"", "Payments@\"issuer\"", "Payments@\"ensureAccount\"", "Payments@\"platformOwner\""], "failed": 0, "passed": 11, "suite": "payments"}
+  wrote deployments/suite-result-payments.json
+--- syndicate: pass (0) ---
+  ok syndicateOf
+  ok syndicates
+  ok byClass
+  ok count
+  ok verify responds
+  ok verify returns a boolean
+  ok syndicate owner
+  ok capacity capital at least the contribution
+  ok capacity free
+  ok owner is a member
+  ok member
+  ok unknown quote
+  ok lines
+  ok lines is a map
+  ok unknown line
+  ok quote records the slip
+  ok quote reserves capacity
+  ok setManager
+  ok suspend
+  ok suspended
+  ok resume
+  ok active
+  ok withdraw above contribution refused
+  ok unknown syndicate
+RSURE_RESULT {"assertions": 24, "behaviours": {"Syndicate@\"capacity\"": ["success"], "Syndicate@\"info\"": ["success"], "Syndicate@\"line\"": ["refusal"], "Syndicate@\"lines\"": ["success"], "Syndicate@\"member\"": ["success"], "Syndicate@\"members\"": ["success"], "Syndicate@\"quote\"": ["refusal", "success"], "Syndicate@\"resume\"": ["success"], "Syndicate@\"setManager\"": ["success"], "Syndicate@\"suspend\"": ["success"], "Syndicate@\"withdrawCapital\"": ["refusal"], "SyndicateBook@\"byClass\"": ["success"], "SyndicateBook@\"count\"": ["success"], "SyndicateBook@\"create\"": ["success"], "SyndicateBook@\"syndicateOf\"": ["refusal"], "SyndicateBook@\"syndicates\"": ["success"], "SyndicateBook@\"verify\"": ["success"]}, "covered_arms": ["SyndicateBook@\"create\"", "SyndicateBook@\"syndicates\"", "SyndicateBook@\"byClass\"", "SyndicateBook@\"count\"", "SyndicateBook@\"verify\"", "Syndicate@\"info\"", "Syndicate@\"capacity\"", "Syndicate@\"members\"", "Syndicate@\"member\"", "Syndicate@\"quote\"", "Syndicate@\"lines\"", "Syndicate@\"line\"", "Syndicate@\"setManager\"", "Syndicate@\"suspend\"", "Syndicate@\"resume\"", "Syndicate@\"withdrawCapital\"", "SyndicateBook@\"syndicateOf\""], "failed": 0, "passed": 24, "suite": "syndicate"}
+  wrote deployments/suite-result-syndicate.json
+--- capital: pass (0) ---
+  ok contribute capital
+  ok contribution increases capital
+  ok member record
+  ok contributed at least the capital
+  ok withdraw one unit
+  ok withdrawal decreases capital
+  ok over-withdrawal refused
+  ok free capacity non-negative
+  ok free is capital minus commitments
+RSURE_RESULT {"assertions": 9, "behaviours": {"Syndicate@\"capacity\"": ["success"], "Syndicate@\"contribute\"": ["success"], "Syndicate@\"members\"": ["success"], "Syndicate@\"withdrawCapital\"": ["success", "refusal"]}, "covered_arms": ["Syndicate@\"contribute\"", "Syndicate@\"members\"", "Syndicate@\"withdrawCapital\"", "Syndicate@\"capacity\""], "failed": 0, "passed": 9, "suite": "capital"}
+  wrote deployments/suite-result-capital.json
+--- broker: pass (0) ---
+  ok register broker
+  ok brokerOf
+  ok brokers
+  ok broker is indexed
+  ok broker info
+  ok broker owner
+  ok broker profile
+  ok profile class list
+  ok no slips initially
+  ok addSlip
+  ok slip indexed
+  ok duplicate owner
+  ok commission cap
+  ok unknown broker
+  ok non-owner addSlip
+RSURE_RESULT {"assertions": 15, "behaviours": {"Broker@\"addSlip\"": ["success", "refusal"], "Broker@\"info\"": ["success"], "Broker@\"profile\"": ["success"], "Broker@\"slips\"": ["success"], "BrokerBook@\"brokerOf\"": ["success", "refusal"], "BrokerBook@\"brokers\"": ["success"], "BrokerBook@\"register\"": ["success", "refusal"]}, "covered_arms": ["BrokerBook@\"register\"", "BrokerBook@\"brokerOf\"", "BrokerBook@\"brokers\"", "Broker@\"info\"", "Broker@\"profile\"", "Broker@\"slips\"", "Broker@\"addSlip\""], "failed": 0, "passed": 15, "suite": "broker"}
+  wrote deployments/suite-result-broker.json
+--- risk: pass (0) ---
+  ok submit risk
+  ok risk lookup
+  ok risks
+  ok risk indexed by insured
+  ok risk info
+  ok risk starts submitted
+  ok risk evidence
+  ok add evidence grows the list
+  ok risk is assessed
+  ok risk is accepted
+  ok bad class
+  ok missing asset
+  ok bad period
+  ok unknown risk
+  ok accept before assess
+  ok not expired
+RSURE_RESULT {"assertions": 16, "behaviours": {"Risk@\"accept\"": ["success", "refusal"], "Risk@\"addEvidence\"": ["success"], "Risk@\"assess\"": ["success"], "Risk@\"evidence\"": ["success"], "Risk@\"expire\"": ["refusal"], "Risk@\"info\"": ["success"], "RiskBook@\"byInsured\"": ["success"], "RiskBook@\"risk\"": ["success", "refusal"], "RiskBook@\"risks\"": ["success"], "RiskBook@\"submit\"": ["success", "refusal"]}, "covered_arms": ["RiskBook@\"submit\"", "RiskBook@\"risk\"", "RiskBook@\"risks\"", "RiskBook@\"byInsured\"", "Risk@\"info\"", "Risk@\"evidence\"", "Risk@\"addEvidence\"", "Risk@\"assess\"", "Risk@\"accept\"", "Risk@\"expire\""], "failed": 0, "passed": 16, "suite": "risk"}
+  wrote deployments/suite-result-risk.json
+--- variance: pass (0) ---
+  ok perfect quality has no measured variance
+  ok mid quality
+  ok partial verdict
+  ok quality out of range
+  ok unknown verdict
+  ok wide gap is flagged
+  ok within tolerance
+  ok negative gap
+  ok bad gap input
+  ok variance-principle load
+  ok zero variance has no load
+  ok variance out of range
+  ok two-point variance rate
+  ok submit variance risk
+  ok assess
+  ok engineering estimate
+  ok insurer estimate
+  ok signed gap
+  ok within tolerance is not flagged
+  ok minimum premium
+  ok accept acknowledges
+  ok acknowledged on accept
+  ok submit flagged risk
+  ok assess wide gap
+  ok wide gap is visible
+  ok wide gap is signed
+  ok variance out of range
+  ok premium below floor
+  ok attestation must bind to evidence
+  ok accept before assess
+RSURE_RESULT {"assertions": 30, "behaviours": {"Risk@\"accept\"": ["success", "refusal"], "Risk@\"assess\"": ["success", "refusal"], "Risk@\"variance\"": ["success"], "RiskBook@\"submit\"": ["success", "refusal"], "SureMath@\"loadedPremium\"": ["success", "refusal"], "SureMath@\"varianceGap\"": ["success", "refusal"], "SureMath@\"varianceRate\"": ["success", "refusal"], "SureMath@\"varianceStats\"": ["success"]}, "covered_arms": ["SureMath@\"varianceRate\"", "SureMath@\"varianceGap\"", "SureMath@\"loadedPremium\"", "SureMath@\"varianceStats\"", "RiskBook@\"submit\"", "Risk@\"assess\"", "Risk@\"variance\"", "Risk@\"accept\""], "failed": 0, "passed": 30, "suite": "variance"}
+  wrote deployments/suite-result-variance.json
+--- slip: pass (0) ---
+  ok slip starts open
+  ok slip owner
+  ok slip info
+  ok premium total
+  ok premium funded starts at zero
+  ok no policy before bind
+  ok non-insured accept
+  ok insured accept
+  ok one subscription
+  ok subscription
+  ok duplicate syndicate
+  ok bind before funding
+  ok non-insured funding
+  ok slip bound
+  ok bind returns policy
+  ok slip stores policy
+  ok bound slip does not expire
+  ok missing risk
+RSURE_RESULT {"assertions": 18, "behaviours": {"Slip@\"accept\"": ["refusal", "success"], "Slip@\"bind\"": ["refusal", "success"], "Slip@\"expire\"": ["refusal"], "Slip@\"fundPremium\"": ["refusal"], "Slip@\"info\"": ["success"], "Slip@\"policy\"": ["success"], "Slip@\"premium\"": ["success"], "Slip@\"subscribe\"": ["success", "refusal"], "Slip@\"subscription\"": ["success"], "Slip@\"subscriptions\"": ["success"], "SlipFactory@\"open\"": ["success", "refusal"]}, "covered_arms": ["SlipFactory@\"open\"", "Slip@\"info\"", "Slip@\"premium\"", "Slip@\"policy\"", "Slip@\"accept\"", "Slip@\"subscribe\"", "Slip@\"subscriptions\"", "Slip@\"subscription\"", "Slip@\"bind\"", "Slip@\"fundPremium\"", "Slip@\"expire\""], "failed": 0, "passed": 18, "suite": "slip"}
+  wrote deployments/suite-result-slip.json
+--- subscription: pass (0) ---
+  ok grant id
+  ok grant uri
+  ok subscription count
+  ok subscription
+  ok duplicate syndicate
+  ok share below one
+  ok share above 10000
+  ok quote is tied to the slip
+  ok quote indexed
+  ok over-subscription is refused
+  ok refused share reserves no capacity
+  ok refused share stores no quote
+  ok slip share count unchanged
+  ok slip remains subscribed
+  ok extra syndicate id is recorded
+RSURE_RESULT {"assertions": 15, "behaviours": {"Slip@\"subscribe\"": ["success", "refusal"], "Slip@\"subscription\"": ["success"], "Slip@\"subscriptions\"": ["success"], "Syndicate@\"quote\"": ["success"], "Syndicate@\"quotes\"": ["success"]}, "covered_arms": ["Slip@\"subscribe\"", "Slip@\"subscriptions\"", "Slip@\"subscription\"", "Syndicate@\"quote\"", "Syndicate@\"quotes\""], "failed": 0, "passed": 15, "suite": "subscription"}
+  wrote deployments/suite-result-subscription.json
+--- binding: pass (0) ---
+  ok accept
+  ok fund the exact premium
+  ok fully funded
+  ok slip bound
+  ok policy URI
+  ok policy created
+  ok one line created
+  ok bind is one-shot
+  ok slip points at the policy
+  ok manager revokes the grant
+  ok grant is revoked
+  ok revoke frees capacity
+  ok bind prunes the revoked share
+  ok revoked share removed
+  ok slip stays open
+  ok removed share is not lead
+  ok removed share is not second
+  ok resubscribed
+  ok rebind returns a policy
+  ok slip bound after rebind
+RSURE_RESULT {"assertions": 20, "behaviours": {"LineFactory@\"create\"": ["success"], "PolicyFactory@\"create\"": ["success"], "Slip@\"accept\"": ["success"], "Slip@\"bind\"": ["success", "refusal"], "Slip@\"fundPremium\"": ["success"], "Slip@\"policy\"": ["success"], "Slip@\"subscribe\"": ["success"], "Syndicate@\"revokeQuote\"": ["success"]}, "covered_arms": ["Slip@\"accept\"", "Slip@\"subscribe\"", "Slip@\"fundPremium\"", "Slip@\"bind\"", "PolicyFactory@\"create\"", "LineFactory@\"create\"", "Slip@\"policy\"", "Syndicate@\"revokeQuote\""], "failed": 0, "passed": 20, "suite": "binding"}
+  wrote deployments/suite-result-binding.json
+--- line: pass (0) ---
+  ok line status
+  ok line has exposure
+  ok remaining equals exposure before pay
+  ok claim not paid
+  ok credit wrong token
+  ok pay wrong token
+  ok release wrong token
+  ok line paid the claim
+  ok paidFor
+  ok remaining decreases
+RSURE_RESULT {"assertions": 10, "behaviours": {"Line@\"credit\"": ["refusal"], "Line@\"info\"": ["success"], "Line@\"paidFor\"": ["refusal", "success"], "Line@\"pay\"": ["refusal", "success"], "Line@\"release\"": ["refusal"], "Line@\"remaining\"": ["success"]}, "covered_arms": ["Line@\"info\"", "Line@\"remaining\"", "Line@\"paidFor\"", "Line@\"credit\"", "Line@\"pay\"", "Line@\"release\""], "failed": 0, "passed": 10, "suite": "line"}
+  wrote deployments/suite-result-line.json
+--- policy: pass (0) ---
+  ok policy is active
+  ok policy is distributed
+  ok policy insured
+  ok terms match
+  ok aggregate limit
+  ok one line
+  ok policy line
+  ok unknown policy line
+  ok no claims
+  ok unknown claim
+  ok payable
+  ok non-holder distribute
+  ok policy not expired
+RSURE_RESULT {"assertions": 13, "behaviours": {"Policy@\"claim\"": ["refusal"], "Policy@\"claims\"": ["success"], "Policy@\"distribute\"": ["refusal"], "Policy@\"expire\"": ["refusal"], "Policy@\"info\"": ["success"], "Policy@\"line\"": ["success", "refusal"], "Policy@\"lines\"": ["success"], "Policy@\"payable\"": ["success"], "Policy@\"terms\"": ["success"]}, "covered_arms": ["Policy@\"info\"", "Policy@\"terms\"", "Policy@\"lines\"", "Policy@\"line\"", "Policy@\"claims\"", "Policy@\"claim\"", "Policy@\"payable\"", "Policy@\"distribute\"", "Policy@\"expire\""], "failed": 0, "passed": 13, "suite": "policy"}
+  wrote deployments/suite-result-policy.json
+--- distribution: pass (0) ---
+  ok policy distributed
+  ok line credited
+  ok policy premium is fully allocated
+RSURE_RESULT {"assertions": 3, "behaviours": {"DistributionFactory@\"create\"": ["success"], "Policy@\"distribute\"": ["success"]}, "covered_arms": ["Policy@\"distribute\"", "DistributionFactory@\"create\""], "failed": 0, "passed": 3, "suite": "distribution"}
+  wrote deployments/suite-result-distribution.json
+--- premium: pass (0) ---
+  ok premium split
+  ok policy distributed
+  ok line credited
+  ok fund contribution
+  ok premium conserved
+  ok fund balance at least the levy
+  ok line shares conserve
+RSURE_RESULT {"assertions": 7, "behaviours": {"Line@\"credit\"": ["success"], "Policy@\"distribute\"": ["success"], "SureFund@\"contribute\"": ["success"], "SureMath@\"lineShares\"": ["success"], "SureMath@\"premiumSplit\"": ["success"]}, "covered_arms": ["SureMath@\"premiumSplit\"", "Policy@\"distribute\"", "Line@\"credit\"", "SureFund@\"contribute\"", "SureMath@\"lineShares\""], "failed": 0, "passed": 7, "suite": "premium"}
+  wrote deployments/suite-result-premium.json
+--- fund: pass (0) ---
+  ok fund info
+  ok fund asset
+  ok fund balance
+  ok contribute to fund
+  ok fund balance increases
+  ok contribution is booked
+  ok no cover
+  ok shortfalls
+  ok admin below threshold
+RSURE_RESULT {"assertions": 9, "behaviours": {"SureFund@\"admin\"": ["refusal"], "SureFund@\"balance\"": ["success"], "SureFund@\"contribute\"": ["success"], "SureFund@\"covered\"": ["refusal"], "SureFund@\"info\"": ["success"], "SureFund@\"shortfalls\"": ["success"]}, "covered_arms": ["SureFund@\"info\"", "SureFund@\"balance\"", "SureFund@\"contribute\"", "SureFund@\"covered\"", "SureFund@\"shortfalls\"", "SureFund@\"admin\""], "failed": 0, "passed": 9, "suite": "fund"}
+  wrote deployments/suite-result-fund.json
+--- books: pass (0) ---
+  ok policy registered
+  ok policy lookup
+  ok policy by insured
+  ok policy by broker
+  ok policy by slip
+  ok unknown policy
+  ok claim registered
+  ok claim lookup
+  ok claim by policy
+  ok claim by insured
+  ok unknown claim
+RSURE_RESULT {"assertions": 11, "behaviours": {"ClaimBook@\"byInsured\"": ["success"], "ClaimBook@\"byPolicy\"": ["success"], "ClaimBook@\"claim\"": ["success", "refusal"], "ClaimBook@\"claims\"": ["success"], "PolicyBook@\"byBroker\"": ["success"], "PolicyBook@\"byInsured\"": ["success"], "PolicyBook@\"bySlip\"": ["success"], "PolicyBook@\"policies\"": ["success"], "PolicyBook@\"policy\"": ["success", "refusal"]}, "covered_arms": ["PolicyBook@\"policies\"", "PolicyBook@\"policy\"", "PolicyBook@\"byInsured\"", "PolicyBook@\"byBroker\"", "PolicyBook@\"bySlip\"", "ClaimBook@\"claims\"", "ClaimBook@\"claim\"", "ClaimBook@\"byPolicy\"", "ClaimBook@\"byInsured\""], "failed": 0, "passed": 11, "suite": "books"}
+  wrote deployments/suite-result-books.json
+--- pause: pass (0) ---
+  ok pauseAll
+  ok paused
+  ok new syndicate blocked
+  ok new risk blocked
+  ok claims remain available while paused
+  ok policy reads remain available
+  ok resumeAll
+  ok resumed
+RSURE_RESULT {"assertions": 8, "behaviours": {"Policy@\"info\"": ["success"], "Policy@\"openClaim\"": ["success"], "RiskBook@\"submit\"": ["refusal"], "SyndicateBook@\"create\"": ["refusal"]}, "covered_arms": ["SyndicateBook@\"create\"", "RiskBook@\"submit\"", "Policy@\"openClaim\"", "Policy@\"info\""], "failed": 0, "passed": 8, "suite": "pause"}
+  wrote deployments/suite-result-pause.json
+--- pause_scope: pass (0) ---
+  ok pauseAll
+  ok new syndicate blocked
+  ok new risk blocked
+  ok claim opens while paused
+  ok policy reads while paused
+  ok fund reads while paused
+  ok expiry remains callable while paused
+  ok resumeAll
+  ok resumed
+RSURE_RESULT {"assertions": 9, "behaviours": {"Policy@\"expire\"": ["refusal"], "Policy@\"info\"": ["success"], "Policy@\"openClaim\"": ["success"], "RiskBook@\"submit\"": ["refusal"], "SureFund@\"covered\"": ["refusal"], "SyndicateBook@\"create\"": ["refusal"]}, "covered_arms": ["SyndicateBook@\"create\"", "RiskBook@\"submit\"", "Policy@\"openClaim\"", "Policy@\"info\"", "SureFund@\"covered\"", "Policy@\"expire\""], "failed": 0, "passed": 9, "suite": "pause_scope"}
+  wrote deployments/suite-result-pause_scope.json
+--- admin: pass (0) ---
+  ok admin keys
+  ok three admins
+  ok admin nonce
+  ok empty signatures
+  ok pauseAll
+  ok paused
+  ok nonce advanced
+  ok nonce replay
+  ok resumeAll
+  ok resumed
+RSURE_RESULT {"assertions": 10, "behaviours": {"SureAdmin@\"admin\"": ["refusal", "success"], "SureAdmin@\"isPaused\"": ["success"], "SureAdmin@\"keys\"": ["success"], "SureAdmin@\"nonce\"": ["success"]}, "covered_arms": ["SureAdmin@\"keys\"", "SureAdmin@\"nonce\"", "SureAdmin@\"admin\"", "SureAdmin@\"isPaused\""], "failed": 0, "passed": 10, "suite": "admin"}
+  wrote deployments/suite-result-admin.json
+--- admin_keys: pass (0) ---
+  ok two distinct signatures accepted
+  ok one signature is below threshold
+  ok wrong domain rejected
+  ok payload domain
+  ok payload is deterministic
+  ok domain separation changes the payload
+RSURE_RESULT {"assertions": 6, "behaviours": {"AdminGuard@\"verify\"": ["success", "refusal"], "Codec@\"adminPayload\"": ["success"]}, "covered_arms": ["AdminGuard@\"verify\"", "Codec@\"adminPayload\""], "failed": 0, "passed": 6, "suite": "admin_keys"}
+  wrote deployments/suite-result-admin_keys.json
+--- cell_liveness: pass (0) ---
+  ok policy read
+  ok malformed claim does not consume policy
+  ok policy still readable
+  ok policy nonce unchanged
+  ok wrong line token does not consume line
+  ok line still readable
+  ok line state unchanged
+  ok duplicate subscription does not consume slip
+  ok slip still readable
+  ok syndicate read
+  ok syndicate read again
+RSURE_RESULT {"assertions": 11, "behaviours": {"Line@\"info\"": ["success"], "Policy@\"info\"": ["success"], "Slip@\"info\"": ["success"], "Syndicate@\"info\"": ["success"]}, "covered_arms": ["Policy@\"info\"", "Line@\"info\"", "Slip@\"info\"", "Syndicate@\"info\""], "failed": 0, "passed": 11, "suite": "cell_liveness"}
+  wrote deployments/suite-result-cell_liveness.json
+--- factory_auth: pass (0) ---
+  ok unregistered broker
+  ok bad broker profile
+  ok bad syndicate profile
+  ok bad risk
+  ok bad policy
+  ok bad claim
+  ok bad line
+RSURE_RESULT {"assertions": 7, "behaviours": {"BrokerBook@\"register\"": ["refusal"], "ClaimFactory@\"create\"": ["refusal"], "LineFactory@\"create\"": ["refusal"], "PolicyFactory@\"create\"": ["refusal"], "RiskBook@\"submit\"": ["refusal"], "SlipFactory@\"open\"": ["refusal"], "SyndicateBook@\"create\"": ["refusal"]}, "covered_arms": ["SlipFactory@\"open\"", "BrokerBook@\"register\"", "SyndicateBook@\"create\"", "RiskBook@\"submit\"", "PolicyFactory@\"create\"", "ClaimFactory@\"create\"", "LineFactory@\"create\""], "failed": 0, "passed": 7, "suite": "factory_auth"}
+  wrote deployments/suite-result-factory_auth.json
+--- replay: pass (0) ---
+  ok duplicate broker
+  ok duplicate bind
+  ok duplicate settlement
+  ok first pause
+  ok admin nonce replay
+  ok resume
+RSURE_RESULT {"assertions": 6, "behaviours": {"BrokerBook@\"register\"": ["refusal"], "Claim@\"settle\"": ["success", "refusal"], "Slip@\"bind\"": ["refusal"], "SureAdmin@\"admin\"": ["refusal"]}, "covered_arms": ["BrokerBook@\"register\"", "Slip@\"bind\"", "Claim@\"settle\"", "SureAdmin@\"admin\""], "failed": 0, "passed": 6, "suite": "replay"}
+  wrote deployments/suite-result-replay.json
+--- expiry: pass (0) ---
+  ok slip expires
+  ok slip status
+  ok premium refunded to the insured
+  ok policy expires
+  ok policy status
+  ok line released
+  ok expired policy refuses new claims
+RSURE_RESULT {"assertions": 7, "behaviours": {"Line@\"release\"": ["success"], "Policy@\"expire\"": ["success"], "Policy@\"openClaim\"": ["refusal"], "Slip@\"expire\"": ["success"]}, "covered_arms": ["Slip@\"expire\"", "Policy@\"expire\"", "Line@\"release\"", "Policy@\"openClaim\""], "failed": 0, "passed": 7, "suite": "expiry"}
+  wrote deployments/suite-result-expiry.json
+--- evidence: pass (0) ---
+  ok risk evidence
+  ok risk evidence appended
+  ok claim evidence
+  ok claim evidence appended
+  ok r-gen disabled
+  ok r-gen config
+  ok r-gen disabled by boundary
+  ok r-gen claim verification disabled
+  ok r-gen credential verification disabled
+RSURE_RESULT {"assertions": 9, "behaviours": {"Claim@\"addEvidence\"": ["success"], "Claim@\"evidence\"": ["success"], "RgenAdapter@\"config\"": ["success"], "RgenAdapter@\"health\"": ["refusal"], "RgenAdapter@\"verifyClaim\"": ["refusal"], "RgenAdapter@\"verifyCredential\"": ["refusal"], "Risk@\"addEvidence\"": ["success"], "Risk@\"evidence\"": ["success"]}, "covered_arms": ["Risk@\"evidence\"", "Risk@\"addEvidence\"", "Claim@\"evidence\"", "Claim@\"addEvidence\"", "RgenAdapter@\"health\"", "RgenAdapter@\"config\"", "RgenAdapter@\"verifyClaim\"", "RgenAdapter@\"verifyCredential\""], "failed": 0, "passed": 9, "suite": "evidence"}
+  wrote deployments/suite-result-evidence.json
+--- oracle: pass (0) ---
+  ok r-gen health disabled
+  ok r-gen config disabled
+  ok oracle factory disabled
+  ok credential factory disabled
+  ok claim factory disabled
+  ok dispute needs r-gen
+  ok claim state stays live
+  ok claim nonce unchanged
+RSURE_RESULT {"assertions": 8, "behaviours": {"Claim@\"dispute\"": ["refusal"], "RgenAdapter@\"claimFactory\"": ["refusal"], "RgenAdapter@\"config\"": ["success"], "RgenAdapter@\"credentialFactory\"": ["refusal"], "RgenAdapter@\"health\"": ["refusal"], "RgenAdapter@\"oracleFactory\"": ["refusal"]}, "covered_arms": ["RgenAdapter@\"health\"", "RgenAdapter@\"config\"", "RgenAdapter@\"oracleFactory\"", "RgenAdapter@\"credentialFactory\"", "RgenAdapter@\"claimFactory\"", "Claim@\"dispute\""], "failed": 0, "passed": 8, "suite": "oracle"}
+  wrote deployments/suite-result-oracle.json
+--- claim_lifecycle: pass (0) ---
+  ok claim notified
+  ok claim id is stable
+  ok policy records the claim
+  ok claim info
+  ok claim evidence
+  ok evidence appended
+  ok classify
+  ok classified
+  ok classification
+  ok assess
+  ok assessed
+  ok assessment recorded
+  ok agree
+  ok agreed
+  ok agreed amount
+  ok settle
+  ok settled
+  ok paid amount
+  ok policy aggregate paid
+  ok policy aggregate remaining
+  ok close
+  ok closed
+  ok line paid
+  ok policy claim is settled
+RSURE_RESULT {"assertions": 24, "behaviours": {"Claim@\"addEvidence\"": ["success"], "Claim@\"agree\"": ["success"], "Claim@\"assess\"": ["success"], "Claim@\"classify\"": ["success"], "Claim@\"close\"": ["success"], "Claim@\"evidence\"": ["success"], "Claim@\"info\"": ["success"], "Claim@\"settle\"": ["success"], "Policy@\"openClaim\"": ["success"]}, "covered_arms": ["Policy@\"openClaim\"", "Claim@\"info\"", "Claim@\"evidence\"", "Claim@\"addEvidence\"", "Claim@\"classify\"", "Claim@\"assess\"", "Claim@\"agree\"", "Claim@\"settle\"", "Claim@\"close\""], "failed": 0, "passed": 24, "suite": "claim_lifecycle"}
+  wrote deployments/suite-result-claim_lifecycle.json
+--- claim_refusals: fail (1) ---
+  ok non-insured cannot notify
+RSURE_RESULT {"assertions": 1, "behaviours": {"Policy@\"openClaim\"": ["refusal"]}, "covered_arms": ["Policy@\"openClaim\""], "failed": 0, "passed": 1, "suite": "claim_refusals"}
+claim_refusals suite failed: deploy errored: preCharge: insufficient funds (9959108 < 10000000)
+  wrote deployments/suite-result-claim_refusals.json
+--- settlement: pass (0) ---
+  ok payable before settlement
+  ok payable is capped by per-claim
+  ok no central-fund cover for this claim
+  ok claim settles
+  ok line paid the claim
+  ok line records the claim
+  ok policy aggregate paid
+  ok policy aggregate remaining
+  ok policy claim settled
+  ok settle plan sums to payable
+  ok fund shortfalls
+  ok payable within deductible is zero
+  ok zero-payable claim settles
+  ok zero payment is recorded on the line
+  ok line paid remains zero
+  ok aggregate paid unchanged
+  ok aggregate remaining unchanged
+  ok policy records a settled zero claim
+  ok policy claim paid is zero
+  ok settled zero claim cannot settle twice
+  ok rounded-away first line is zero
+  ok last line absorbs the remainder
+RSURE_RESULT {"assertions": 22, "behaviours": {"Claim@\"settle\"": ["success", "refusal"], "Line@\"pay\"": ["success"], "LineSettle@\"pay\"": ["success"], "Policy@\"payable\"": ["success"], "Policy@\"settleClaim\"": ["success"], "SureFund@\"covered\"": ["refusal"], "SureFund@\"shortfalls\"": ["success"], "SureMath@\"settlePlan\"": ["success"]}, "covered_arms": ["Policy@\"payable\"", "SureFund@\"covered\"", "Claim@\"settle\"", "Line@\"pay\"", "Policy@\"settleClaim\"", "SureMath@\"settlePlan\"", "SureFund@\"shortfalls\"", "LineSettle@\"pay\""], "failed": 0, "passed": 22, "suite": "settlement"}
+  wrote deployments/suite-result-settlement.json
+--- shortfall: pass (0) ---
+  ok payable is capped by per-claim
+  ok payable is capped by aggregate
+  ok claim 0 pays the per-claim cap
+  ok claim 1 pays the per-claim cap
+  ok claim 2 pays the per-claim cap
+  ok claim 3 pays the per-claim cap
+  ok aggregate exhausted
+  ok aggregate is exhausted
+  ok payments never exceed the aggregate
+  ok fund shortfalls
+  ok fund balance
+RSURE_RESULT {"assertions": 11, "behaviours": {"Claim@\"settle\"": ["success"], "Policy@\"openClaim\"": ["refusal"], "Policy@\"payable\"": ["success"], "SureFund@\"balance\"": ["success"], "SureFund@\"shortfalls\"": ["success"]}, "covered_arms": ["Policy@\"payable\"", "Claim@\"settle\"", "Policy@\"openClaim\"", "SureFund@\"shortfalls\"", "SureFund@\"balance\""], "failed": 0, "passed": 11, "suite": "shortfall"}
+  wrote deployments/suite-result-shortfall.json
+--- conservation: pass (0) ---
+  scenario premium_distribution (cons-premium)
+  ok premium conservation 105866676
+  ok premium split 1000 = 100 commission + 25 levy + 875 credits
+  ok 1 line(s) within exposure
+  ok premium split conserves
+  ok commission
+  ok line credits
+  scenario claim_settlement (cons-settle)
+  ok settlement conservation 105866676
+  ok payout 100 = 100 lines + 0 fund cover
+  ok 1 line(s) within exposure
+  ok settlement conserves
+  ok line payout
+  ok fund cover is bounded
+  negative control (cons-negative)
+  ok negative control: untracked slip escrow detected (105866676 -> 105865676)
+  ok negative control detects escrow
+RSURE_RESULT {"assertions": 7, "behaviours": {"Claim@\"settle\"": ["success"], "Line@\"credit\"": ["success"], "Line@\"pay\"": ["success"], "Policy@\"distribute\"": ["success"], "SureFund@\"covered\"": ["success"], "SureMath@\"premiumSplit\"": ["success"]}, "covered_arms": ["Policy@\"distribute\"", "SureMath@\"premiumSplit\"", "Line@\"credit\"", "Claim@\"settle\"", "Line@\"pay\"", "SureFund@\"covered\""], "failed": 0, "passed": 7, "suite": "conservation"}
+  wrote deployments/suite-result-conservation.json
+--- behavior: pass (0) ---
+  ok clock now
+  ok clock returns a height
+  ok clock is monotone
+  ok verifier hash
+  ok verifier hash deterministic
+  ok verifier hash separates inputs
+  ok verifier sigOk responds
+  ok verifier refuses a malformed signature
+  ok canonical
+  ok canonical joins with a separator
+  ok codec hash
+  ok adminPayload is domain separated
+RSURE_RESULT {"assertions": 12, "behaviours": {"Clock@\"now\"": ["success"], "Codec@\"adminPayload\"": ["success"], "Codec@\"canonical\"": ["success"], "Codec@\"hash\"": ["success"], "Verifier@\"hash\"": ["success"], "Verifier@\"sigOk\"": ["refusal"]}, "covered_arms": ["Clock@\"now\"", "Verifier@\"hash\"", "Verifier@\"sigOk\"", "Codec@\"canonical\"", "Codec@\"hash\"", "Codec@\"adminPayload\""], "failed": 0, "passed": 12, "suite": "behavior"}
+  wrote deployments/suite-result-behavior.json
+--- generality: pass (0) ---
+  ok terms fields include aggregateLimit
+  ok valid terms accepted
+  ok missing class
+  ok per-claim above aggregate
+  ok deductible at per-claim
+  ok commission plus fund too high
+  ok unknown evidence policy
+  ok unknown claims lead policy
+  ok terms hash
+  ok terms hash is stable
+  ok bps sum
+  ok share conserves
+  ok share rejects bps above 10000
+  ok premium split conserves
+  ok premium split rejects bps sum
+  ok line exposures
+  ok line exposures sum to aggregate
+  ok line exposures require 10000 bps
+  ok line shares
+  ok line shares conserve
+  ok payable applies deductible
+  ok payable rejects negative amount
+  ok settle plan
+  ok settle plan sums to payable
+RSURE_RESULT {"assertions": 24, "behaviours": {"CoverTerms@\"fields\"": ["success"], "CoverTerms@\"hash\"": ["success"], "CoverTerms@\"validate\"": ["success", "refusal"], "SureMath@\"bpsSum\"": ["success"], "SureMath@\"lineExposures\"": ["success", "refusal"], "SureMath@\"lineShares\"": ["success"], "SureMath@\"payable\"": ["success", "refusal"], "SureMath@\"premiumSplit\"": ["success", "refusal"], "SureMath@\"settlePlan\"": ["success"], "SureMath@\"share\"": ["success", "refusal"]}, "covered_arms": ["CoverTerms@\"fields\"", "CoverTerms@\"validate\"", "CoverTerms@\"hash\"", "SureMath@\"bpsSum\"", "SureMath@\"share\"", "SureMath@\"premiumSplit\"", "SureMath@\"lineExposures\"", "SureMath@\"lineShares\"", "SureMath@\"payable\"", "SureMath@\"settlePlan\""], "failed": 0, "passed": 24, "suite": "generality"}
+  wrote deployments/suite-result-generality.json
+--- share_reuse: pass (0) ---
+  ok reusable account lookup
+  ok reusable deposit facet
+  ok bound policy is a reusable value
+  ok line is a reusable capability
+  ok reused policy pays
+RSURE_RESULT {"assertions": 5, "behaviours": {"Claim@\"settle\"": ["success"], "Line@\"info\"": ["success"], "Payments@\"accountOf\"": ["success"], "Payments@\"depositFacet\"": ["success"], "Policy@\"info\"": ["success"]}, "covered_arms": ["Payments@\"accountOf\"", "Payments@\"depositFacet\"", "Policy@\"info\"", "Line@\"info\"", "Claim@\"settle\""], "failed": 0, "passed": 5, "suite": "share_reuse"}
+  wrote deployments/suite-result-share_reuse.json
+--- integration_rcash: pass (0) ---
+  ok r-cash rail health
+  ok account
+  ok REV issuer
+  ok deposit facet
+  ok r-cash root is a URI
+RSURE_RESULT {"assertions": 5, "behaviours": {"Payments@\"accountOf\"": ["success"], "Payments@\"depositFacet\"": ["success"], "Payments@\"health\"": ["success"], "Payments@\"issuer\"": ["success"]}, "covered_arms": ["Payments@\"health\"", "Payments@\"accountOf\"", "Payments@\"issuer\"", "Payments@\"depositFacet\""], "failed": 0, "passed": 5, "suite": "integration_rcash"}
+  wrote deployments/suite-result-integration_rcash.json
+--- integration_rgen: pass (0) ---
+  ok adapter config
+  ok r-gen disabled by configuration
+  ok config records disabled
+  ok kasset variance
+  ok quality-derived rate
+  ok quality sum is reported
+  ok source is recorded
+  ok unapproved kasset needs an attestation
+RSURE_RESULT {"assertions": 8, "behaviours": {"RgenAdapter@\"config\"": ["success"], "RgenAdapter@\"health\"": ["success"], "RgenAdapter@\"variance\"": ["success", "refusal"]}, "covered_arms": ["RgenAdapter@\"health\"", "RgenAdapter@\"config\"", "RgenAdapter@\"variance\""], "failed": 0, "passed": 8, "suite": "integration_rgen"}
+  wrote deployments/suite-result-integration_rgen.json
+--- integration_rshare: pass (0) ---
+  ok policy active
+  ok claim settled
+  ok policy paid
+  ok line paid
+RSURE_RESULT {"assertions": 4, "behaviours": {"LineFactory@\"create\"": ["success"], "Policy@\"settleClaim\"": ["success"], "PolicyFactory@\"create\"": ["success"], "SlipFactory@\"open\"": ["success"]}, "covered_arms": ["SlipFactory@\"open\"", "PolicyFactory@\"create\"", "LineFactory@\"create\"", "Policy@\"settleClaim\""], "failed": 0, "passed": 4, "suite": "integration_rshare"}
+  wrote deployments/suite-result-integration_rshare.json
+run_suites: wrote deployments/suite-results.json (38 result rows)
+make: *** [Makefile:168: unit-all] Error 1

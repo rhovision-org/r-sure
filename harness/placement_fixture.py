@@ -301,6 +301,36 @@ class Placement:
             self.syndicate_id, self.syndicate_uri = found[1], found[2]
         return self.syndicate_uri
 
+    def add_syndicate(self, name: str, *, owner: str = "key12",
+                      class_: str | None = None,
+                      capital: int | None = None) -> tuple[str, str, str]:
+        """Create and fund an extra syndicate under a distinct signing key.
+
+        Suites use this to exercise a second subscription without a second placement.
+        Returns ``(syndicate_id, syndicate_uri, owner_key)``.
+        """
+        actors.ensure_vault(owner)
+        owner_id = actors.ensure_account(owner)
+        amount = self.capital if capital is None else capital
+        actors.ensure_funds(owner, amount + 2000)
+        book = self.component("component:syndicate-book")
+        profile = {
+            "name": f"syndicate:{name}"[:64],
+            "assetId": self.asset_id,
+            "riskAppetite": [class_ or self.class_],
+        }
+        reply = actors.invoke(book, "create", f"*dId, {_rl(profile)}", key=owner)
+        if isinstance(reply, tuple) and reply[0] is True:
+            syndicate_id = _id("extra syndicate create", reply)
+            syndicate_uri = _uri("extra syndicate create", reply)
+        else:
+            found = actors.invoke(book, "syndicateOf", _rl(owner_id), key=owner)
+            _ok("extra syndicate reuse", found)
+            syndicate_id, syndicate_uri = found[1], found[2]
+        _ok("extra syndicate contribute",
+            actors.contribute_syndicate(syndicate_uri, amount, key=owner))
+        return syndicate_id, syndicate_uri, owner
+
     def contribute(self, amount: int) -> tuple:
         self._ensure_signer(self.syndicate_owner)
         reply = actors.contribute_syndicate(

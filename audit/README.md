@@ -22,11 +22,11 @@ the book chapters summarise them.
 | [hazop/nodes.yaml](hazop/nodes.yaml) | 19 nodes, guide words and parameters |
 | [hazop/tabletop-2026-11-05.md](hazop/tabletop-2026-11-05.md) | internal tabletop record |
 | [hazop/worksheet-install-2026-11-05.md](hazop/worksheet-install-2026-11-05.md) | install guide-word worksheet for N16–N19 |
-| [registers/findings.yaml](registers/findings.yaml) | 28 findings |
-| [registers/hazards.yaml](registers/hazards.yaml) | 37 hazards |
-| [registers/improvements.yaml](registers/improvements.yaml) | 30 fixes/deferred items |
+| [registers/findings.yaml](registers/findings.yaml) | 31 findings |
+| [registers/hazards.yaml](registers/hazards.yaml) | 40 hazards |
+| [registers/improvements.yaml](registers/improvements.yaml) | 33 fixes/deferred items |
 | [registers/tests.yaml](registers/tests.yaml) | 42 tests: 37 passing, 3 `not_run`, 2 implemented |
-| [registers/rca.yaml](registers/rca.yaml) | RCA-001 install and RCA-002 match state-loss root causes |
+| [registers/rca.yaml](registers/rca.yaml) | RCA-001 install, RCA-002 match state-loss and RCA-003 admission/terminal-state root causes |
 | [registers/experiments.yaml](registers/experiments.yaml) | 10 RCA experiments with artifacts |
 | [rca/template.md](rca/template.md) | RCA template |
 | [registers/theorems.yaml](registers/theorems.yaml) | 285 registered Lean component-model theorems |

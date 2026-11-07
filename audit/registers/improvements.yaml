@@ -529,3 +529,59 @@ improvements:
   rollout_stage: devnet
   rollback: remove the target from spec-check
   status: implemented
+- id: R-031
+  priority: P1
+  findings:
+  - F-029
+  hazards:
+  - HZ-038
+  change: Accept amount 0 in LineSettle.pay, and in lineSettlePayments record
+    paidFor[claimId] = 0 with a nonce bump and reply (true, 0) without resolving Payments
+    or moving value. A zero payable or a zero rounded line share now settles and is
+    recorded exactly once at both the syndicate line and the Line.
+  type: contract
+  breaking: false
+  migration: fresh devnet install
+  compatibility_window: v1 only
+  tests:
+  - T-028
+  rollout_stage: devnet
+  rollback: redeploy the previous Root and terms
+  status: implemented
+- id: R-032
+  priority: P1
+  findings:
+  - F-030
+  hazards:
+  - HZ-039
+  change: Compute the existing share total in slipSubscribe before Syndicate.quote and
+    refuse (false, "share") when the prospective total would exceed 10000, so no capacity
+    is reserved and the slip stays bindable.
+  type: contract
+  breaking: false
+  migration: fresh devnet install
+  compatibility_window: v1 only
+  tests:
+  - T-008
+  rollout_stage: devnet
+  rollback: redeploy the previous Root and terms
+  status: implemented
+- id: R-033
+  priority: P1
+  findings:
+  - F-031
+  hazards:
+  - HZ-040
+  change: Pre-flight quote liveness in Slip.bind before opening any line; prune revoked,
+    expired and unknown shares, recompute lead/second/status and nonce, repost the slip and
+    reply (false, "quote closed"). A consumed grant is surfaced as (false, "quote consumed")
+    without pruning so an already-open line is not orphaned.
+  type: contract
+  breaking: false
+  migration: fresh devnet install
+  compatibility_window: v1 only
+  tests:
+  - T-009
+  rollout_stage: devnet
+  rollback: redeploy the previous Root and terms
+  status: implemented

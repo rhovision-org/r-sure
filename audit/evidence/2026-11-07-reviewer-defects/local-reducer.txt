@@ -1,0 +1,68 @@
+tools/local_reducer.sh
+local-reducer: r-cash stub rho:id:ybotkti4fizw86rtd4ek413kagpyisno6o5ep8smseeowsx1znqy
+local-reducer: root rho:id:in8ykkndp3jnzpewpzk5doana49nw9yakqwb5kzkggkjcnt993py
+local-reducer: installed 01_kernel.rho
+local-reducer: installed 02_admin.rho
+local-reducer: installed 03_terms.rho
+local-reducer: installed 04_math.rho
+local-reducer: installed 05_rgen.rho
+local-reducer: installed 40_payments.rho
+local-reducer: installed 15_distribution.rho
+local-reducer: installed 16_fund.rho
+local-reducer: installed 10_syndicate.rho
+local-reducer: installed 11_broker.rho
+local-reducer: installed 12_risk.rho
+local-reducer: installed 13_slip.rho
+local-reducer: installed 14_line.rho
+local-reducer: installed 17_policy.rho
+local-reducer: installed 18_claim.rho
+local-reducer: installed 19_books.rho
+local-reducer: resolve component:clock -> (true, `rho:id:nu88oqx4c3hjggzfy3ad4414r8ngi5h5opcqjsp7cugogk5umjqo`, 1)
+local-reducer: suremath share(1000, 250) -> (true, 25, 975)
+local-reducer: 25 model vectors match SureMath
+local-reducer: insured 1111pjC8LgoBQApxaJeuGBJWhC4rAQDbVbkSMLaXjGdfiUynCXef9
+local-reducer: syndicate syn:1111pjC8LgoBQApxaJeuGBJWhC4rAQDbVbkSMLaXjGdfiUynCXef9:0 rho:id:5t9pb43ptbhyxg4pgcu9boapy3s48c5tjxcgbwiz9ejrcqrpmhko
+local-reducer: contributed (true, Nil)
+local-reducer: broker (true, "brk:1111pjC8LgoBQApxaJeuGBJWhC4rAQDbVbkSMLaXjGdfiUynCXef9", `rho:id:xhqapj5woz457tqthcpkar4diz5kur8btutbpbhb8e19n61auady`)
+local-reducer: risk rsk:1111pjC8LgoBQApxaJeuGBJWhC4rAQDbVbkSMLaXjGdfiUynCXef9:0 rho:id:oh9h733sebskmcbzno6wi6femmizdgoasrf4uitzx7ts8mr3mnqo
+local-reducer: slip (true, "slp:brk:1111pjC8LgoBQApxaJeuGBJWhC4rAQDbVbkSMLaXjGdfiUynCXef9:0", `rho:id:9kebs4ezprhpr5yb8xc99xcayeorazfcby3s73eyfjg3te5cuuay`)
+local-reducer: subscribed (true, "grt:syn:1111pjC8LgoBQApxaJeuGBJWhC4rAQDbVbkSMLaXjGdfiUynCXef9:0:1", `rho:id:rumte9dtckohowguiy8o3uuf5puc1hiiqpd6tha1o113xcmfj9xo`)
+local-reducer: accepted (true, Nil)
+local-reducer: funded (true, 1000)
+local-reducer: bound slp:brk:1111pjC8LgoBQApxaJeuGBJWhC4rAQDbVbkSMLaXjGdfiUynCXef9:0 -> (true, `rho:id:sca4idn4pbhwrdp8t6o3mu5w51xdn81gdnx6hgr88ntykdfyyg3y`)
+local-reducer: claim clm:pol:slp:brk:1111pjC8LgoBQApxaJeuGBJWhC4rAQDbVbkSMLaXjGdfiUynCXef9:0:0 rho:id:t58qn3qb3bpr7jwh6a7fqxmpiau3yo59br1ehpipx69ef4tksrso
+local-reducer: claim agreed -> (true, "agreed")
+local-reducer: claim settled and closed
+local-reducer: refused bind is one-shot -> closed
+local-reducer: refused settle after close -> not agreed
+local-reducer: refused classify after close -> closed
+local-reducer: refused unknown component -> unknown component
+local-reducer: refused duplicate register -> duplicate
+local-reducer: refused non-installer register -> not installer
+local-reducer: refused duplicate syndicate -> duplicate owner
+local-reducer: refused duplicate broker -> duplicate owner
+local-reducer: refused admin replay -> replay
+local-reducer: refused admin below threshold -> below threshold
+local-reducer: refused blank terms -> class
+local-reducer: refused terms without asset -> asset
+local-reducer: refused non-insured claim -> not insured
+local-reducer: refused loss after period -> notice
+local-reducer: refused zero claim -> amount
+local-reducer: second claim rho:id:gnx7ikgjdshsa4mnwahibpkir78wcarknhice51qunwn14d17sho
+local-reducer: refused settle before agreement -> not agreed
+local-reducer: refused assess before classify -> not manager
+local-reducer: refused non-lead agree -> not lead
+local-reducer: refused terminal agree -> closed
+local-reducer: refused terminal evidence -> closed
+local-reducer: refused unknown policy claim -> unknown claim
+local-reducer: refused unknown book claim -> unknown claim
+local-reducer: refused paused syndicate create -> paused
+local-reducer: refused create after resume -> duplicate owner
+local-reducer: pause and resume with two admin signatures
+local-reducer: kasset variance -> (true, {"kasset" : "rho:id:jgg3rdebr8oe4rtsa46eq83wrzeiwntt4gz1ohh7nm841oqq869y", "liabilityBps" : 10000, "qualitySum" : 12, "quantity" : {"unit" : "inspections", "value" : 12}, "source" : "derived", "status" : "approved", "varianceBps" : 4000, "verdict" : "valid"})
+local-reducer: variance risk rho:id:m9a334s7ymuetj7kgw3g8fwy74iywqxp66twst3897sk5oa7y5jy
+local-reducer: risk variance -> (true, {"acknowledged" : false, "engineeringBps" : 4000, "expectedLoss" : 800, "flagged" : false, "gapBps" : 1000, "insurerBps" : 5000, "minimumPremium" : 880, "source" : "derived"})
+local-reducer: variance acknowledged on accept
+local-reducer: refused variance above range -> assessment
+local-reducer: refused premium below floor -> premium floor
+local-reducer: root keys -> 21 components

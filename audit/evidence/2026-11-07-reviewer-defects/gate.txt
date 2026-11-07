@@ -1,0 +1,8 @@
+.venv/bin/python tools/check_match_style.py --self-test
+check-match-style: self-test: 14 fixture groups passed
+.venv/bin/python tools/check_match_style.py --check
+check-match-style: 24 files, 411 match sites (113 let, 298 dispatch), 0 violation(s), 0 suppression(s)
+  depth histogram: {'0': 79, '1': 214, '2': 97, '3': 21}
+  per file: contracts/src/deploy/00_root.rho=22, contracts/src/deploy/01_kernel.rho=4, contracts/src/deploy/02_admin.rho=11, contracts/src/deploy/03_terms.rho=11, contracts/src/deploy/04_math.rho=22, contracts/src/deploy/05_rgen.rho=28, contracts/src/deploy/10_syndicate.rho=52, contracts/src/deploy/11_broker.rho=9, contracts/src/deploy/12_risk.rho=33, contracts/src/deploy/13_slip.rho=62, contracts/src/deploy/14_line.rho=6, contracts/src/deploy/15_distribution.rho=27, contracts/src/deploy/16_fund.rho=28, contracts/src/deploy/17_policy.rho=34, contracts/src/deploy/18_claim.rho=26, contracts/src/deploy/19_books.rho=9, contracts/src/deploy/40_payments.rho=14, contracts/src/lib/AdminGuard.rho=1, contracts/src/lib/AdminSet.rho=1, contracts/src/lib/AdminsText.rho=1, contracts/src/lib/Auth.rho=1, contracts/src/lib/Guard.rho=6, contracts/src/lib/Money.rho=2, contracts/src/lib/Resolve.rho=1
+.venv/bin/python tools/check_call_arity.py
+check-call-arity: 41 file(s), 0 mismatch(es)

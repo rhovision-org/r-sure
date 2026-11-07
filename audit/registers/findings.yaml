@@ -926,3 +926,126 @@ findings:
   proposed_fix: R-028
   reviewer: internal
   verified_at: '2026-11-07'
+- id: F-029
+  title: Zero-payable settlement aborts at LineSettle.pay
+  severity: P1
+  class: composition
+  status: fixed
+  confidence: high
+  components:
+  - SureMath
+  - Policy
+  - Line
+  - LineSettle
+  - Claim
+  arms:
+  - SureMath@"payable"
+  - Policy@"settleClaim"
+  - Line@"pay"
+  - LineSettle@"pay"
+  - Claim@"settle"
+  hazards:
+  - HZ-038
+  invariants:
+  - INV-5
+  - INV-6
+  - INV-8
+  - INV-9
+  evidence_level: E2
+  evidence:
+  - kind: source
+    ref: contracts/src/deploy/10_syndicate.rho
+  - kind: source
+    ref: contracts/src/deploy/17_policy.rho
+  - kind: log
+    ref: audit/evidence/2026-11-07-reviewer-defects/settlement-zero.log
+  description: SureMath.payable legally returns (true, 0) when the agreed amount is within
+    the deductible, and settlePlan produces zero line amounts for that payable or for a
+    rounded-away line share. LineSettle.pay refused amount < 1, and payLinePlan turned the
+    refusal into 1/0, so a within-deductible claim could never settle and the deploy aborted.
+  preconditions: A claim is agreed at or below the policy deductible, or a line share rounds
+    to zero while the payable is positive.
+  impact: The claim cannot reach a settled terminal state; the settlement deploy aborts and
+    the caller retries forever.
+  proposed_fix: R-031
+  reviewer: internal
+  verified_at: '2026-11-07'
+  tests:
+  - T-028
+- id: F-030
+  title: Slip.subscribe accepts a share above the 10000 bps placement
+  severity: P1
+  class: invariant
+  status: fixed
+  confidence: high
+  components:
+  - Slip
+  - Syndicate
+  arms:
+  - Slip@"subscribe"
+  - Syndicate@"quote"
+  hazards:
+  - HZ-039
+  invariants:
+  - INV-1
+  - INV-2
+  evidence_level: E2
+  evidence:
+  - kind: source
+    ref: contracts/src/deploy/13_slip.rho
+  - kind: log
+    ref: audit/evidence/2026-11-07-reviewer-defects/subscription-over.log
+  description: Slip.subscribe checked only the individual 1..10000 bps bound. The running
+    sum was computed after the share was stored and used only for the status label, so a
+    second syndicate could push the total above 10000. Slip.bind requires exactly 10000 and
+    the slip has no arm to reduce or remove a subscription, leaving it permanently
+    un-bindable and the requested capacity reserved in the syndicate.
+  preconditions: A syndicate manager subscribes while the existing shares already sum near
+    10000.
+  impact: The slip can never bind and the extra quote's capacity stays committed.
+  proposed_fix: R-032
+  reviewer: internal
+  verified_at: '2026-11-07'
+  tests:
+  - T-008
+- id: F-031
+  title: Revoked and expired grants wedge Slip.bind
+  severity: P1
+  class: composition
+  status: fixed
+  confidence: high
+  components:
+  - Slip
+  - Syndicate
+  - LineGrant
+  arms:
+  - Slip@"bind"
+  - Slip@"subscribe"
+  - Syndicate@"revokeQuote"
+  - Syndicate@"expireQuote"
+  - Syndicate@"quote"
+  hazards:
+  - HZ-040
+  invariants:
+  - INV-2
+  - INV-11
+  evidence_level: E2
+  evidence:
+  - kind: source
+    ref: contracts/src/deploy/13_slip.rho
+  - kind: source
+    ref: contracts/src/deploy/10_syndicate.rho
+  - kind: log
+    ref: audit/evidence/2026-11-07-reviewer-defects/binding-revoked.log
+  description: revokeQuote and expireQuote free committed capacity and mark the syndicate
+    quote status, but cannot notify the Slip. The stale grant stayed in the slip shares;
+    bind called openLine, got (false, "closed"), and slipOpenLines aborted with 1/0. The
+    slip retried the same dead grant forever and neither returned a refusal nor recovered.
+  preconditions: A syndicate manager revokes a quote, or a quote expires, after the slip
+    subscribed and before the insured binds.
+  impact: The slip can never bind; the premium stays locked and every bind attempt aborts.
+  proposed_fix: R-033
+  reviewer: internal
+  verified_at: '2026-11-07'
+  tests:
+  - T-009

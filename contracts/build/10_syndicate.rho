@@ -346,7 +346,7 @@ contract authIsOwner(dId, @ownerId, ret) = {
               l => {
                 match l.get("paidFor").get(claimId) {
                   Nil => {
-                    if (amount < 1 || amount > exposure - l.get("paid")) {
+                    if (amount < 0 || amount > exposure - l.get("paid")) {
                       stateCell!(s) | ret2!((false, "amount"))
                     } else {
                       lineSettleBalance!(s, l, *stateCell, lineId, claimId, amount,
@@ -415,33 +415,40 @@ contract authIsOwner(dId, @ownerId, ret) = {
 
   contract lineSettlePayments(@s, @l, stateCell, @lineId, @claimId, @amount,
                               @targetOwner, @purse, @brand, ret2) = {
-    new fCh in {
-      syndicateResolve!("component:payments", *fCh) |
-      for (@p <- fCh) {
-        match p {
-          (true, Payments) => {
-            new facetCh in {
-              @Payments!("depositFacet", targetOwner, s.get("assetId"), *facetCh) |
-              for (@fr <- facetCh) {
-                match fr {
-                  (true, facet) => {
-                    stateCell!(s.set("capital", s.get("capital") - amount)
-                      .set("written", s.get("written") - amount)
-                      .set("claimsPaid", s.get("claimsPaid") + amount)
-                      .set("lines", s.get("lines").set(lineId,
-                        l.set("paid", l.get("paid") + amount)
-                         .set("paidFor", l.get("paidFor").set(claimId, amount))))
-                      .set("nonce", s.get("nonce") + 1)) |
-                    lineSettleMove!(purse, brand, amount, facet, *ret2)
+    if (amount > 0) {
+      new fCh in {
+        syndicateResolve!("component:payments", *fCh) |
+        for (@p <- fCh) {
+          match p {
+            (true, Payments) => {
+              new facetCh in {
+                @Payments!("depositFacet", targetOwner, s.get("assetId"), *facetCh) |
+                for (@fr <- facetCh) {
+                  match fr {
+                    (true, facet) => {
+                      stateCell!(s.set("capital", s.get("capital") - amount)
+                        .set("written", s.get("written") - amount)
+                        .set("claimsPaid", s.get("claimsPaid") + amount)
+                        .set("lines", s.get("lines").set(lineId,
+                          l.set("paid", l.get("paid") + amount)
+                           .set("paidFor", l.get("paidFor").set(claimId, amount))))
+                        .set("nonce", s.get("nonce") + 1)) |
+                      lineSettleMove!(purse, brand, amount, facet, *ret2)
+                    }
+                    _ => { stateCell!(s) | ret2!(fr) }
                   }
-                  _ => { stateCell!(s) | ret2!(fr) }
                 }
               }
             }
+            _ => { stateCell!(s) | ret2!((false, "payments unavailable")) }
           }
-          _ => { stateCell!(s) | ret2!((false, "payments unavailable")) }
         }
       }
+    } else {
+      stateCell!(s.set("lines", s.get("lines").set(lineId,
+        l.set("paidFor", l.get("paidFor").set(claimId, 0))))
+        .set("nonce", s.get("nonce") + 1)) |
+      ret2!((true, 0))
     }
   } |
 

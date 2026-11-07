@@ -1,0 +1,26 @@
+--- settlement: pass (0) ---
+  ok payable before settlement
+  ok payable is capped by per-claim
+  ok no central-fund cover for this claim
+  ok claim settles
+  ok line paid the claim
+  ok line records the claim
+  ok policy aggregate paid
+  ok policy aggregate remaining
+  ok policy claim settled
+  ok settle plan sums to payable
+  ok fund shortfalls
+  ok payable within deductible is zero
+  ok zero-payable claim settles
+  ok zero payment is recorded on the line
+  ok line paid remains zero
+  ok aggregate paid unchanged
+  ok aggregate remaining unchanged
+  ok policy records a settled zero claim
+  ok policy claim paid is zero
+  ok settled zero claim cannot settle twice
+  ok rounded-away first line is zero
+  ok last line absorbs the remainder
+RSURE_RESULT {"assertions": 22, "behaviours": {"Claim@\"settle\"": ["success", "refusal"], "Line@\"pay\"": ["success"], "LineSettle@\"pay\"": ["success"], "Policy@\"payable\"": ["success"], "Policy@\"settleClaim\"": ["success"], "SureFund@\"covered\"": ["refusal"], "SureFund@\"shortfalls\"": ["success"], "SureMath@\"settlePlan\"": ["success"]}, "covered_arms": ["Policy@\"payable\"", "SureFund@\"covered\"", "Claim@\"settle\"", "Line@\"pay\"", "Policy@\"settleClaim\"", "SureMath@\"settlePlan\"", "SureFund@\"shortfalls\"", "LineSettle@\"pay\""], "failed": 0, "passed": 22, "suite": "settlement"}
+  wrote deployments/suite-result-settlement.json
+run_suites: wrote deployments/suite-results.json (38 result rows)

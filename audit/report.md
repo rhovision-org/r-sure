@@ -3,7 +3,7 @@
 > **Status:** Internal desk, tabletop, install-RCA, match-style and behavioural review, 2026-11-07.
 > **Not an independent audit.** The 17-term install is E2 green after the fixes recorded in
 > `rca.yaml#RCA-001`. The 2026-11-07 campaign records 38 run rows (37 behavioural suites plus the
-> fixture self-check), 410 assertions and 0 assertion failures; every row passes, and the
+> fixture self-check), 438 assertions and 0 assertion failures; every row passes, and the
 > three Playwright journeys pass. Four
 > registered rows are process/tool gates (`not_run` or implemented static gates), not
 > behavioural suites. No primitive is audited or production-safe.
@@ -29,12 +29,12 @@ and processed. Three caveats bound that claim:
 | Interfaces in the composition matrix | 46 |
 | HAZOP nodes | 19 |
 | Public arms registered | 168 |
-| Hazards | 37 |
-| Findings | 28 |
+| Hazards | 40 |
+| Findings | 31 |
 | P0 findings | 5 (5 fixed; F-002/F-022/F-023/F-024 E2 install) |
-| P1 findings | 14 (14 fixed, 0 open) |
+| P1 findings | 17 (17 fixed, 0 open) |
 | P2/P3 findings | 9 (6 fixed, 3 accepted) |
-| Improvements | 30 |
+| Improvements | 33 |
 | Tests registered | 42 (37 passing, 3 `not_run`, 2 implemented) |
 | Lean theorems registered | 285 (register and source agree; no unregistered theorem) |
 | Claims | 26 covered, 1 partial, 1 tool; 15 critical primitives covered |
@@ -80,6 +80,9 @@ and processed. Three caveats bound that claim:
 | F-021 settled claim can be re-agreed | fixed | `agree`/`addEvidence`/`classify`/`assess`/`dispute`/`applyDecision` reject terminal status; INV-10 is covered. |
 | F-025 harness manual propose masks proposer errors | fixed | The harness now calls manual propose only when configured or `RSURE_FORCE_PROPOSE=1`; the node advertises autopropose. |
 | F-027 mutating match refusal loses the state cell | fixed | Nineteen refusal arms replied after consuming the cell without reposting; every refusal now reposts. HZ-037 and RCA-002 record it. |
+| F-029 zero-payable claim cannot settle | fixed | `SureMath.payable` returns zero within the deductible; `LineSettle.pay` accepts zero and `lineSettlePayments` records `paidFor=0` without a purse move. The settlement suite settles a within-deductible claim. HZ-038 and RCA-003 record it. |
+| F-030 over-subscription makes a slip un-bindable | fixed | `slipSubscribe` bounds the prospective share total before the syndicate quote; a refused share reserves no capacity. The subscription suite covers it. HZ-039 and RCA-003 record it. |
+| F-031 revoked or expired grant wedges bind | fixed | `Slip.bind` pre-flights quote liveness, prunes revoked/expired shares, recomputes lead/second/status and replies `"quote closed"`; a resubscription rebinds. The binding suite covers it. HZ-040 and RCA-003 record it. |
 
 ## P2/P3
 
@@ -130,7 +133,7 @@ gap.
 - `make local-reducer` passes all 17 terms, 25 vectors, the journey, the refusal vectors and
   the variance checks on the refactored tree.
 - `deployments/suite-results.json` records the 2026-11-07 campaign on the refactored tree:
-  37/37 behavioural suites plus the fixture self-check pass, 410 assertions, 0
+  37/37 behavioural suites plus the fixture self-check pass, 438 assertions, 0
   failures; `make web-e2e` passes 3/3 journeys.
   The campaign exposed a helper-call arity defect during development; it is fixed and gated
   by `make check-call-arity`. The expiry fixture now uses the placement start for the risk

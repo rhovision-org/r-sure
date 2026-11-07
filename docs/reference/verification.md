@@ -31,8 +31,8 @@ make check-match-style
 
 ```text
 check-match-style: self-test: 14 fixture groups passed
-check-match-style: 24 files, 403 match sites (108 let, 295 dispatch), 0 violation(s), 0 suppression(s)
-  depth histogram: {'0': 74, '1': 213, '2': 96, '3': 20}
+check-match-style: 24 files, 411 match sites (113 let, 298 dispatch), 0 violation(s), 0 suppression(s)
+  depth histogram: {'0': 79, '1': 214, '2': 97, '3': 21}
 ```
 
 The scanner is heuristic, not a parser; the self-test covers every rule and the parse gate
@@ -48,8 +48,8 @@ interface, the F-020/F-021 guard checks and the narrow pause scope, with no unre
 register IDs. `make audit-scan` runs the heuristic scanners for unclosed bundles,
 take-await-take, reply shapes and pause scope.
 
-Current audit state: 30/30 component reviews, 46 interfaces, 37 hazards, 28 findings (25
-fixed, 3 accepted boundaries), 29 improvements, 41 registered suites and 285 registered
+Current audit state: 30/30 component reviews, 46 interfaces, 40 hazards, 31 findings (28
+fixed, 3 accepted boundaries), 33 improvements, 42 registered suites and 285 registered
 theorems. `check_bundle_closedness.py` reports zero candidates. The devnet install completes
 all 17 terms and the node proposes blocks; the install root-cause analysis is recorded under
 `audit/evidence/2026-11-05-install-rca`. F-003 (narrow, fail-closed pause), F-020 (payable
@@ -70,10 +70,10 @@ make web-e2e          # Playwright, devnet-gated
 ```
 
 The behavioural campaign's current output is recorded in `deployments/suite-results.json`:
-38 run rows (37 behavioural suites plus the fixture self-check), 410 assertions, 0
+38 run rows (37 behavioural suites plus the fixture self-check), 438 assertions, 0
 assertion failures (2026-11-07, on the refactored tree). The
 coverage report derives 37/42 registered suites passing (the rest are three `not_run`
-process gates and two implemented static gates), 126/151 public arms, 139/168 all registered
+process gates and two implemented static gates), 128/151 public arms, 141/168 all registered
 arms and 8/11 core-flow arms asserted. `make web-e2e` passes 3/3 journeys.
 
 The formal gate's current output:

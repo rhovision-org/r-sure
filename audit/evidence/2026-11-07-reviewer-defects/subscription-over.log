@@ -1,0 +1,19 @@
+--- subscription: pass (0) ---
+  ok grant id
+  ok grant uri
+  ok subscription count
+  ok subscription
+  ok duplicate syndicate
+  ok share below one
+  ok share above 10000
+  ok quote is tied to the slip
+  ok quote indexed
+  ok over-subscription is refused
+  ok refused share reserves no capacity
+  ok refused share stores no quote
+  ok slip share count unchanged
+  ok slip remains subscribed
+  ok extra syndicate id is recorded
+RSURE_RESULT {"assertions": 15, "behaviours": {"Slip@\"subscribe\"": ["success", "refusal"], "Slip@\"subscription\"": ["success"], "Slip@\"subscriptions\"": ["success"], "Syndicate@\"quote\"": ["success"], "Syndicate@\"quotes\"": ["success"]}, "covered_arms": ["Slip@\"subscribe\"", "Slip@\"subscriptions\"", "Slip@\"subscription\"", "Syndicate@\"quote\"", "Syndicate@\"quotes\""], "failed": 0, "passed": 15, "suite": "subscription"}
+  wrote deployments/suite-result-subscription.json
+run_suites: wrote deployments/suite-results.json (38 result rows)

@@ -1,0 +1,54 @@
+Campaign summary, 2026-11-07 reviewer-defects fix
+
+Run rows: 38 (37 behavioural suites plus the fixture self-check)
+Assertions: 438
+Assertion failures: 0
+
+The first full run failed claim_refusals with a devnet preCharge funding error
+(preCharge: insufficient funds 9959108 < 10000000). The suite passed on rerun;
+the failure was environmental, not a contract assertion.
+
+admin                    pass  assertions= 10  failed=0
+admin_keys               pass  assertions=  6  failed=0
+behavior                 pass  assertions= 12  failed=0
+binding                  pass  assertions= 20  failed=0
+books                    pass  assertions= 11  failed=0
+broker                   pass  assertions= 15  failed=0
+capital                  pass  assertions=  9  failed=0
+cell_liveness            pass  assertions= 11  failed=0
+claim_lifecycle          pass  assertions= 24  failed=0
+claim_refusals           pass  assertions= 13  failed=0
+conservation             pass  assertions=  7  failed=0
+distribution             pass  assertions=  3  failed=0
+evidence                 pass  assertions=  9  failed=0
+expiry                   pass  assertions=  7  failed=0
+factory_auth             pass  assertions=  7  failed=0
+fixtures                 pass  assertions=  0  failed=0
+fund                     pass  assertions=  9  failed=0
+generality               pass  assertions= 24  failed=0
+integration_rcash        pass  assertions=  5  failed=0
+integration_rgen         pass  assertions=  8  failed=0
+integration_rshare       pass  assertions=  4  failed=0
+line                     pass  assertions= 10  failed=0
+oracle                   pass  assertions=  8  failed=0
+pause                    pass  assertions=  8  failed=0
+pause_scope              pass  assertions=  9  failed=0
+payments                 pass  assertions= 11  failed=0
+policy                   pass  assertions= 13  failed=0
+premium                  pass  assertions=  7  failed=0
+replay                   pass  assertions=  6  failed=0
+risk                     pass  assertions= 16  failed=0
+root                     pass  assertions= 11  failed=0
+settlement               pass  assertions= 22  failed=0
+share_reuse              pass  assertions=  5  failed=0
+shortfall                pass  assertions= 11  failed=0
+slip                     pass  assertions= 18  failed=0
+subscription             pass  assertions= 15  failed=0
+syndicate                pass  assertions= 24  failed=0
+variance                 pass  assertions= 30  failed=0
+
+Focused regression suites (rerun for evidence): settlement, subscription, binding
+all pass with 22, 15 and 20 assertions respectively.
+
+Local reducer: pass (17 terms, 25 vectors, journey, refusal vectors, pause/resume).
+Static: build, measure, parse, normalize, arity and match style pass.

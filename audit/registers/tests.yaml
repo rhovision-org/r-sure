@@ -39,12 +39,14 @@ tests:
   name: subscription
   file: harness/unit_subscription.py
   status: passing
-  focus: behavioural suite; not run until the devnet install clears P0
+  focus: behavioural suite; quote, duplicate, share bounds, prospective over-subscription
+    refusal with no capacity reserved (F-030)
 - id: T-009
   name: binding
   file: harness/unit_binding.py
   status: passing
-  focus: behavioural suite; not run until the devnet install clears P0
+  focus: behavioural suite; full bind plus revoked-grant pre-flight, stale-share prune
+    and successful rebind (F-031)
 - id: T-010
   name: line
   file: harness/unit_line.py
@@ -139,7 +141,8 @@ tests:
   name: settlement
   file: harness/unit_settlement.py
   status: passing
-  focus: behavioural suite; not run until the devnet install clears P0
+  focus: behavioural suite; payable, positive line payout, fund cover, aggregate and a
+    zero-payable (within-deductible) settlement recorded at zero (F-029)
 - id: T-029
   name: shortfall
   file: harness/unit_shortfall.py

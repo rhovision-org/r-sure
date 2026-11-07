@@ -15,7 +15,7 @@
 
 ## Review
 
-`bind` consumes `slipState`, validates status, acceptance, funding and subscription, then runs the staged `slipBindTerms`, `slipBindLines`, `slipBindCreate` and `slipBindDistribute` helpers and reposts on success and on every refusal. `subscribe` holds the cell across `Syndicate.quote` (P2). `fundPremium` requires the insured (F-007), and `expire` refunds a funded premium (F-011) and reposts. The 2026-11-07 refactor flattened bind to depth 3 and merged the four identical `slipExpireQuotes` arms.
+`bind` consumes `slipState`, validates status, acceptance, funding and subscription, pre-flights grant liveness, then runs the staged `slipBindTerms`, `slipBindLines`, `slipBindCreate` and `slipBindDistribute` helpers and reposts on success and on every refusal. A revoked or expired share is pruned, lead/second/status recomputed and the refusal returned; a consumed grant is surfaced without pruning (F-031). `subscribe` holds the cell across `Syndicate.quote` (P2) and refuses a prospective total above 10000 bps before the quote, so a refused share reserves no capacity (F-030). `fundPremium` requires the insured (F-007), and `expire` refunds a funded premium (F-011) and reposts. The 2026-11-07 refactor flattened bind to depth 3 and merged the four identical `slipExpireQuotes` arms.
 
 Slip-level pause gates were omitted because the term is near the parser-depth budget. Binding is blocked through the gated `Syndicate.quote`/`openLine` capacity path; this is recorded in F-003 and R-003.
 

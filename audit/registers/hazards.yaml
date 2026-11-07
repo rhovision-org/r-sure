@@ -1010,3 +1010,90 @@ hazards:
   - contracts/src/deploy/17_policy.rho
   - audit/rholang-match-audit.md
   arm: BrokerBook@"register"
+- id: HZ-038
+  node: N13
+  guide_word: LESS
+  parameter: settlement amount
+  deviation: LineSettle.pay refuses an amount of 0, so a zero payable (within deductible) or
+    a zero rounded line share turns a valid settlement into a refusal and a 1/0 abort.
+  causes:
+  - the line settle guard requires amount >= 1
+  - payLinePlan maps every line settlement refusal to 1/0
+  consequences:
+  - a claim within the deductible can never reach a settled terminal state
+  - the policy aggregate and the claim status never record the zero-payout settlement
+  severity: high
+  likelihood: high
+  risk: high
+  controls:
+  - accept zero in LineSettle.pay and record paidFor[claimId] = 0 without a purse move
+  - the settlement suite settles a within-deductible claim and asserts the zero record
+  findings:
+  - F-029
+  tests:
+  - T-028
+  disposition: mitigate
+  owner: contracts
+  evidence:
+  - contracts/src/deploy/10_syndicate.rho
+  - contracts/src/deploy/17_policy.rho
+  - audit/evidence/2026-11-07-reviewer-defects/settlement-zero.log
+  arm: LineSettle@"pay"
+- id: HZ-039
+  node: N08
+  guide_word: MORE
+  parameter: subscription shareBps
+  deviation: Slip.subscribe accepts a share that pushes the running total above 10000; the
+    bound is checked only per subscription and the running sum is computed after the quote
+    and store.
+  causes:
+  - no cumulative check before Syndicate.quote
+  - the slip has no unsubscribe or reduce arm
+  consequences:
+  - the slip can never bind because bind requires exactly 10000
+  - the refused extra share has already reserved syndicate capacity
+  severity: high
+  likelihood: high
+  risk: high
+  controls:
+  - compute the existing sum before the quote and refuse a prospective total above 10000
+  - the subscription suite asserts the refusal, no capacity reserved and no quote stored
+  findings:
+  - F-030
+  tests:
+  - T-008
+  disposition: mitigate
+  owner: contracts
+  evidence:
+  - contracts/src/deploy/13_slip.rho
+  - audit/evidence/2026-11-07-reviewer-defects/subscription-over.log
+  arm: Slip@"subscribe"
+- id: HZ-040
+  node: N05
+  guide_word: STALE
+  parameter: grantId in the slip shares
+  deviation: revokeQuote and expireQuote mark a grant revoked or expired but never remove
+    the slip share; bind opens every share and aborts on the first non-open quote.
+  causes:
+  - revocation lives in the syndicate and cannot notify the slip
+  - slipOpenLines maps every openLine refusal to 1/0
+  consequences:
+  - the slip can never bind after a manager revokes or a quote expires
+  - the premium stays locked and bind retries the same dead grant
+  severity: high
+  likelihood: medium
+  risk: high
+  controls:
+  - bind pre-flights quote liveness before opening any line
+  - stale shares are pruned, lead/second/status recomputed and the refusal is returned
+  findings:
+  - F-031
+  tests:
+  - T-009
+  disposition: mitigate
+  owner: contracts
+  evidence:
+  - contracts/src/deploy/13_slip.rho
+  - contracts/src/deploy/10_syndicate.rho
+  - audit/evidence/2026-11-07-reviewer-defects/binding-revoked.log
+  arm: Slip@"bind"

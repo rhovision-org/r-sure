@@ -1,0 +1,24 @@
+--- binding: pass (0) ---
+  ok accept
+  ok fund the exact premium
+  ok fully funded
+  ok slip bound
+  ok policy URI
+  ok policy created
+  ok one line created
+  ok bind is one-shot
+  ok slip points at the policy
+  ok manager revokes the grant
+  ok grant is revoked
+  ok revoke frees capacity
+  ok bind prunes the revoked share
+  ok revoked share removed
+  ok slip stays open
+  ok removed share is not lead
+  ok removed share is not second
+  ok resubscribed
+  ok rebind returns a policy
+  ok slip bound after rebind
+RSURE_RESULT {"assertions": 20, "behaviours": {"LineFactory@\"create\"": ["success"], "PolicyFactory@\"create\"": ["success"], "Slip@\"accept\"": ["success"], "Slip@\"bind\"": ["success", "refusal"], "Slip@\"fundPremium\"": ["success"], "Slip@\"policy\"": ["success"], "Slip@\"subscribe\"": ["success"], "Syndicate@\"revokeQuote\"": ["success"]}, "covered_arms": ["Slip@\"accept\"", "Slip@\"subscribe\"", "Slip@\"fundPremium\"", "Slip@\"bind\"", "PolicyFactory@\"create\"", "LineFactory@\"create\"", "Slip@\"policy\"", "Syndicate@\"revokeQuote\""], "failed": 0, "passed": 20, "suite": "binding"}
+  wrote deployments/suite-result-binding.json
+run_suites: wrote deployments/suite-results.json (38 result rows)

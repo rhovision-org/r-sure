@@ -1,0 +1,118 @@
+{
+  "schema": "rsure.evidence/v2",
+  "id": "2026-11-07-reviewer-defects",
+  "date": "2026-11-07",
+  "kind": "Fix verification for F-029, F-030 and F-031",
+  "commit": "1160bc78044a3b71b73b395aabcaf342fee64a9d",
+  "scope": {
+    "audit": "internal",
+    "production": false,
+    "dynamic": "focused devnet suites, full behavioural campaign, web e2e and static gates on the shared devnet"
+  },
+  "artifacts": [
+    {
+      "path": "settlement-zero.log",
+      "role": "suite-log",
+      "sha256": "5743c4e1d39a86ef4fc4a399971e0d53cbbe603c10bed3a3aff1c6bf97b60d5d",
+      "bytes": 1459,
+      "description": "Settlement suite: positive payout plus within-deductible zero settlement and replay refusal."
+    },
+    {
+      "path": "subscription-over.log",
+      "role": "suite-log",
+      "sha256": "a1fbd2d6580f600d574d6639897c467f2b3d16b7f27570f9d821a01d61f4c671",
+      "bytes": 978,
+      "description": "Subscription suite: individual bounds plus prospective over-subscription refusal with no capacity reserved."
+    },
+    {
+      "path": "binding-revoked.log",
+      "role": "suite-log",
+      "sha256": "3a8d9c5273972ea23ebb3bcc5e78441dfbd61945405a820fcc9e85a7530623ee",
+      "bytes": 1222,
+      "description": "Binding suite: full bind, revoked-grant prune and successful rebind."
+    },
+    {
+      "path": "campaign.log",
+      "role": "campaign-log",
+      "sha256": "264b38f5c69372cc1b43ddd7dc371582312e15697dd7eb88240337a0b0d94184",
+      "bytes": 32471,
+      "description": "Raw full campaign log; the first claim_refusals row failed on a devnet preCharge funding error and passed on rerun."
+    },
+    {
+      "path": "campaign-summary.txt",
+      "role": "summary",
+      "sha256": "ff62ba5d161221211e11e8f5ebd25d8782001ac19e577128afa62d24925de520",
+      "bytes": 2790,
+      "description": "Campaign summary: 38 run rows, 438 assertions, 0 failures after the claim_refusals rerun."
+    },
+    {
+      "path": "gate.txt",
+      "role": "gate-log",
+      "sha256": "cefe360412334efab3cc83d1abc050424e543aaedb52bd788c300729acfb99b7",
+      "bytes": 1305,
+      "description": "Match-style and call-arity gates."
+    },
+    {
+      "path": "match-style-report.txt",
+      "role": "report",
+      "sha256": "330a3afb3986f67d406fac83753408793c7900fa6b33430d6a4b4d44e744bb69",
+      "bytes": 1107,
+      "description": "Match-style inventory for the changed tree."
+    },
+    {
+      "path": "local-reducer.txt",
+      "role": "gate-log",
+      "sha256": "ac91f397c5f5816541c2d9531faf4d3140bdfc274cd2b43a57efe86addbec0aa",
+      "bytes": 4665,
+      "description": "In-memory node reducer: install, journey, vectors, refusals, pause."
+    },
+    {
+      "path": "web-e2e.txt",
+      "role": "e2e-log",
+      "sha256": "20d9c773fe5160d6341032d078ed933104e99e5517b5184e0b4712b28951a265",
+      "bytes": 2967,
+      "description": "Three Playwright journeys against the installed devnet."
+    },
+    {
+      "path": "rca.md",
+      "role": "rca",
+      "sha256": "c6877c42f03643be87990dfbf81350aa2f8f897f5ff34939429ff3173880bfea",
+      "bytes": 3332,
+      "description": "Readable RCA-003 narrative."
+    },
+    {
+      "path": "commit.txt",
+      "role": "metadata",
+      "sha256": "7c459ae9202ee582cf934f6287a563a56ec3f5dfa485b95758b87a4159184cc7",
+      "bytes": 41,
+      "description": "Base commit at capture; the fixes are in the working tree."
+    }
+  ],
+  "commands": [
+    "make build measure parse-check normalize-check spec-check",
+    "make check-match-style check-call-arity",
+    "make local-reducer",
+    "make install",
+    ".venv/bin/python harness/run_suites.py settlement subscription binding",
+    "make unit-all",
+    ".venv/bin/python harness/run_suites.py claim_refusals",
+    "make web-e2e",
+    "make audit-trace coverage-report"
+  ],
+  "results": {
+    "settlement_zero": "pass",
+    "subscription_over": "pass",
+    "binding_revoked": "pass",
+    "static_gates": "pass",
+    "local_reducer": "pass",
+    "full_campaign": "pass after rerunning claim_refusals; the first attempt failed on a devnet preCharge funding error",
+    "web_e2e": "pass (3/3)"
+  },
+  "limitations": [
+    "Internal review and shared devnet; the result is not an independent audit.",
+    "The fixes were captured in the working tree on top of the recorded base commit; the evidence hashes cover the files above, not the contracts.",
+    "The consumed-grant repair path is surfaced but not implemented; see RCA-003 residual risk.",
+    "The first full campaign run failed claim_refusals with a phlo preCharge funding error; the rerun passed and the suite results reflect the rerun.",
+    "The bind pre-flight is atomic because the node does not interleave deploys; a future scheduler change would need re-review."
+  ]
+}

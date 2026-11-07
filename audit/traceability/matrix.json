@@ -3,10 +3,10 @@
   "summary": {
     "arms": 168,
     "arms_with_flow_rule": 11,
-    "arms_with_hazard": 25,
-    "hazards": 37,
-    "findings": 28,
-    "improvements": 30,
+    "arms_with_hazard": 27,
+    "hazards": 40,
+    "findings": 31,
+    "improvements": 33,
     "tests": 42
   },
   "arms": [
@@ -671,10 +671,18 @@
       "flow_rule": null,
       "flow_status": null,
       "lean_target": null,
-      "hazards": [],
-      "findings": [],
-      "improvements": [],
-      "tests": []
+      "hazards": [
+        "HZ-038"
+      ],
+      "findings": [
+        "F-029"
+      ],
+      "improvements": [
+        "R-031"
+      ],
+      "tests": [
+        "T-028"
+      ]
     },
     {
       "component": "LineRelease",
@@ -1353,10 +1361,18 @@
       "flow_rule": null,
       "flow_status": null,
       "lean_target": null,
-      "hazards": [],
-      "findings": [],
-      "improvements": [],
-      "tests": []
+      "hazards": [
+        "HZ-039"
+      ],
+      "findings": [
+        "F-030"
+      ],
+      "improvements": [
+        "R-032"
+      ],
+      "tests": [
+        "T-008"
+      ]
     },
     {
       "component": "Slip",
@@ -1389,15 +1405,18 @@
       "lean_target": "RSure.Model.Slip.slip_bind_requires_subscription",
       "hazards": [
         "HZ-002",
-        "HZ-018"
+        "HZ-018",
+        "HZ-040"
       ],
       "findings": [
         "F-001",
-        "F-013"
+        "F-013",
+        "F-031"
       ],
       "improvements": [
         "R-001",
-        "R-013"
+        "R-013",
+        "R-033"
       ],
       "tests": [
         "T-003",

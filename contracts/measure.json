@@ -37,7 +37,7 @@
       "contracts": 15
     },
     "10_syndicate.rho": {
-      "bytes": 25038,
+      "bytes": 25227,
       "depth": 30,
       "contracts": 33
     },
@@ -52,9 +52,9 @@
       "contracts": 17
     },
     "13_slip.rho": {
-      "bytes": 18818,
-      "depth": 31,
-      "contracts": 33
+      "bytes": 21552,
+      "depth": 34,
+      "contracts": 39
     },
     "14_line.rho": {
       "bytes": 3417,

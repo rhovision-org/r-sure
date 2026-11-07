@@ -23,9 +23,16 @@ Slip -> PolicyFactory.create(lines, premiumPurse, policyToken, claimToken)
 Slip -> Policy.distribute(policyToken)
 ```
 
-The last line absorbs the aggregate remainder. A grant that is not consumed is revoked by the
-manager or released by `Syndicate.expireQuote` after its expiry, so capacity cannot be stuck
-forever.
+The last line absorbs the aggregate remainder. A subscription is refused if it would push the
+running share total above 10000 bps; the check runs before the syndicate quote, so a refused
+share reserves no capacity. A grant that is not consumed is revoked by the manager or released
+by `Syndicate.expireQuote` after its expiry, so capacity cannot be stuck forever.
+
+`Slip.bind` pre-flights every grant before opening a line. A revoked or expired grant cannot
+notify the slip directly, so bind prunes those shares, recomputes the lead, second and status,
+and returns `(false, "quote closed")`; the insured can re-subscribe the freed share and bind
+again. A grant already marked consumed is surfaced as `(false, "quote consumed")` without
+pruning, because its line may already exist.
 
 ## Why a grant rather than a bare commitment
 

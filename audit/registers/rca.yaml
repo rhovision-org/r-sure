@@ -473,3 +473,232 @@ records:
   - contracts/src/deploy/15_distribution.rho
   - contracts/src/deploy/17_policy.rho
   - tools/check_match_style.py
+- id: RCA-003
+  title: Zero-payable settlement, over-subscription and stale-grant bind wedge
+  date: '2026-11-07'
+  owner: contracts-audit
+  severity: P1
+  status: closed
+  template: audit/rca/template.md
+  nodes:
+  - N05
+  - N08
+  - N13
+  findings:
+  - F-029
+  - F-030
+  - F-031
+  hazards:
+  - HZ-038
+  - HZ-039
+  - HZ-040
+  experiments: []
+  incident: A reviewer reading the Rholang found three terminal-state traps. A claim within
+    the deductible produces a payable of zero; LineSettle.pay refuses zero and payLinePlan
+    aborts with 1/0. A subscription that pushes the share sum above 10000 is accepted and
+    the slip can never bind. A revoked or expired grant stays in the slip shares and bind
+    aborts on the first non-open quote, retrying the same dead grant forever.
+  fault_tree:
+    top_event: A valid placement cannot settle or bind, or is made permanently un-bindable
+    gate: OR
+    evidence:
+    - contracts/src/deploy/10_syndicate.rho
+    - contracts/src/deploy/13_slip.rho
+    children:
+    - event: A zero payable cannot settle
+      gate: AND
+      evidence:
+      - contracts/src/deploy/17_policy.rho
+      children:
+      - event: SureMath.payable returns (true, 0) within the deductible and settlePlan
+          produces zero line amounts
+        gate: LEAF
+        evidence:
+        - contracts/src/deploy/04_math.rho
+        - contracts/src/deploy/17_policy.rho
+      - event: LineSettle.pay refuses amount 0 and payLinePlan turns the refusal into 1/0
+        gate: LEAF
+        evidence:
+        - contracts/src/deploy/10_syndicate.rho
+        - contracts/src/deploy/17_policy.rho
+        - audit/evidence/2026-11-07-reviewer-defects/settlement-zero.log
+    - event: A slip can be over-subscribed
+      gate: AND
+      evidence:
+      - contracts/src/deploy/13_slip.rho
+      children:
+      - event: Slip.subscribe checks only the individual bps bound
+        gate: LEAF
+        evidence:
+        - contracts/src/deploy/13_slip.rho
+      - event: The running sum is computed after the quote and store, and no arm can
+          remove a share
+        gate: LEAF
+        evidence:
+        - contracts/src/deploy/13_slip.rho
+        - audit/evidence/2026-11-07-reviewer-defects/subscription-over.log
+    - event: A revoked grant wedges bind
+      gate: AND
+      evidence:
+      - contracts/src/deploy/13_slip.rho
+      children:
+      - event: revokeQuote and expireQuote mark the quote but cannot notify the slip
+        gate: LEAF
+        evidence:
+        - contracts/src/deploy/10_syndicate.rho
+      - event: slipOpenLines aborts with 1/0 on the first non-open quote
+        gate: LEAF
+        evidence:
+        - contracts/src/deploy/13_slip.rho
+        - audit/evidence/2026-11-07-reviewer-defects/binding-revoked.log
+  five_whys:
+  - question: Why could a within-deductible claim not settle?
+    answer: The line settlement contract refused an amount of zero, and the caller treated
+      the refusal as a fatal invariant breach.
+  - question: Why did the caller not handle zero?
+    answer: The plan was built from the payable and passed per-line amounts without
+      distinguishing a legitimate zero from an invalid amount.
+  - question: Why was the share sum not bounded?
+    answer: The subscribe path validated only the individual share and computed the total
+      after committing the quote.
+  - question: Why did a revoked grant wedge the slip?
+    answer: Revocation lives in the syndicate and bind trusted the slip's stale share list;
+      no liveness pre-flight or removal arm existed.
+  - question: Why were these not caught earlier?
+    answer: The suites covered positive-payable settlement, single full subscriptions and
+      happy-path binding; the adversarial edge states had no regression.
+  hypotheses:
+  - id: H-001
+    statement: A payable-zero short-circuit in policySettleApply is required.
+    status: rejected
+    note: The line-level zero path covers the deductible, rounding-zero line shares and a
+      fully covered linePayable uniformly, and preserves the per-line exactly-once records.
+  - id: H-002
+    statement: The over-subscription refusal must happen before Syndicate.quote or the
+      syndicate reserves capacity for a dead share.
+    status: supported
+    note: The suite asserts committed == 0 and quotes == {} after the refusal.
+  - id: H-003
+    statement: Pruning stale shares at bind recovers the slip without reopening lines.
+    status: supported
+    note: The pre-flight runs before any openLine and the deploy does not interleave.
+  - id: H-004
+    statement: A consumed grant can be pruned like a revoked one.
+    status: rejected
+    note: A consumed grant implies lines may already be open; pruning would orphan them, so
+      bind surfaces "quote consumed" without pruning.
+  root_cause: Three admission and terminal-state invariants were validated only on one side
+    of a component boundary. SureMath produced a legal zero that LineSettle treated as
+    invalid; Slip.subscribe validated the line share but not the placement total; and the
+    syndicate marked a grant dead without the slip learning it. The shared escape is that
+    each caller assumed its input was in the success state and had no recovery arm.
+  escape_analysis:
+  - The Lean model includes math_payable_zero_of_le_deductible but no behavioural zero
+    settlement.
+  - The subscription suite tested individual bounds only; the cumulative sum was checked
+    only at bind.
+  - revokeQuote and expireQuote were tested at the syndicate, never through bind.
+  - The concurrency review treated the shares list as immutable after subscribe.
+  - The match-style gate proves repost shape, not terminal-state reachability.
+  corrective_actions:
+  - id: CA-01
+    action: Accept zero in LineSettle.pay and record paidFor[claimId] = 0 without a purse
+      move.
+    owner: contracts
+    status: done
+    findings:
+    - F-029
+    improvements:
+    - R-031
+  - id: CA-02
+    action: Bound the prospective subscription total before the syndicate quote.
+    owner: contracts
+    status: done
+    findings:
+    - F-030
+    improvements:
+    - R-032
+  - id: CA-03
+    action: Pre-flight quote liveness at bind and prune stale shares with a clean refusal.
+    owner: contracts
+    status: done
+    findings:
+    - F-031
+    improvements:
+    - R-033
+  - id: CA-04
+    action: Add regression assertions to the settlement, subscription and binding suites.
+    owner: contracts-audit
+    status: done
+    findings:
+    - F-029
+    - F-030
+    - F-031
+    improvements: []
+  - id: CA-05
+    action: Track the consumed-grant repair path as follow-up hardening; bind currently
+      surfaces it without pruning.
+    owner: contracts
+    status: open
+    findings:
+    - F-031
+    improvements: []
+  verification:
+    zero_settlement:
+      result: pass
+      detail: a within-deductible claim settles at zero; paidFor, aggregate and claim status
+        are asserted; a replay refuses.
+      evidence:
+      - audit/evidence/2026-11-07-reviewer-defects/settlement-zero.log
+    over_subscription:
+      result: pass
+      detail: a share that would exceed 10000 is refused before the quote with no capacity
+        reserved.
+      evidence:
+      - audit/evidence/2026-11-07-reviewer-defects/subscription-over.log
+    revoked_grant:
+      result: pass
+      detail: bind prunes the revoked share, replies "quote closed", and rebinds after a new
+        subscription.
+      evidence:
+      - audit/evidence/2026-11-07-reviewer-defects/binding-revoked.log
+    static_gates:
+      result: pass
+      detail: build, measure, parse, normalize, arity and match style pass.
+      evidence:
+      - audit/evidence/2026-11-07-reviewer-defects/gate.txt
+    local_reducer:
+      result: pass
+      detail: the in-memory node reducer installs and drives the journey.
+      evidence:
+      - audit/evidence/2026-11-07-reviewer-defects/local-reducer.txt
+    full_campaign:
+      result: pass
+      detail: 38 run rows and 438 assertions pass; claim_refusals was rerun after a devnet
+        preCharge funding error in the first attempt.
+      evidence:
+      - audit/evidence/2026-11-07-reviewer-defects/campaign-summary.txt
+      - audit/evidence/2026-11-07-reviewer-defects/campaign.log
+    web_e2e:
+      result: pass
+      detail: the placement, claim and settlement journey and the two other journeys pass.
+      evidence:
+      - audit/evidence/2026-11-07-reviewer-defects/web-e2e.txt
+  residual_risk:
+  - A consumed grant from a previous partially executed bind is surfaced but not repaired;
+    a follow-up should make post-openLine clean refusals abort atomically or resume policy
+    creation.
+  - The bind pre-flight is atomic only because the node does not interleave deploys.
+  - The audit is internal and the fixes are validated on the shared devnet, not an
+    independent environment.
+  evidence:
+  - audit/evidence/2026-11-07-reviewer-defects/manifest.json
+  - audit/evidence/2026-11-07-reviewer-defects/rca.md
+  - audit/evidence/2026-11-07-reviewer-defects/settlement-zero.log
+  - audit/evidence/2026-11-07-reviewer-defects/subscription-over.log
+  - audit/evidence/2026-11-07-reviewer-defects/binding-revoked.log
+  - audit/evidence/2026-11-07-reviewer-defects/gate.txt
+  - audit/evidence/2026-11-07-reviewer-defects/local-reducer.txt
+  - contracts/src/deploy/10_syndicate.rho
+  - contracts/src/deploy/13_slip.rho
+  - contracts/src/deploy/17_policy.rho

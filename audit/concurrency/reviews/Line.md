@@ -15,7 +15,7 @@
 
 ## Review
 
-`credit`/`pay`/`release` call a capability first, then consume `lineState` to update it. If the capability succeeds and the state update cannot complete, value has moved without a matching line record (P1; the deploy should roll back on failure, but the arm is not structured as a single take/repost). `pay` is one-shot per claim via `paidFor`. `bundle+{*Line}` is unclosed.
+`credit`/`pay`/`release` call a capability first, then consume `lineState` to update it. If the capability succeeds and the state update cannot complete, value has moved without a matching line record (P1; the deploy should roll back on failure, but the arm is not structured as a single take/repost). `pay` is one-shot per claim via `paidFor`; a zero settlement is recorded as `paidFor[claimId] = 0` and moves no value (F-029). `bundle+{*Line}` is unclosed.
 
 ## Await / value-move notes
 

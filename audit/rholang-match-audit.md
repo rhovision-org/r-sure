@@ -14,16 +14,18 @@ work. The scanner is `tools/rholang_match.py`; the gate is `tools/check_match_st
 
 | | Before | After |
 |---|---|---|
-| Match sites | 397 | 403 |
-| Lets | 109 | 108 |
-| Dispatch | 288 | 295 |
-| Depth histogram | `{0:73,1:163,2:81,3:30,4:24,5:12,6:9,7:5}` | `{0:74,1:213,2:96,3:20}` |
+| Match sites | 397 | 411 |
+| Lets | 109 | 113 |
+| Dispatch | 288 | 298 |
+| Depth histogram | `{0:73,1:163,2:81,3:30,4:24,5:12,6:9,7:5}` | `{0:79,1:214,2:97,3:21}` |
 | Violations | 64 (41 M-001, 19 M-004, 4 M-005) | 0 |
 | Suppressions | 0 | 0 |
 
 The site count rose because staged helpers introduce one explicit `match` for the reply
 they forward; the dispatch depth fell by construction. The maximum was 7 (`SlipFactory.open`,
-`Policy.settleClaim`); it is now 3.
+`Policy.settleClaim`); it is now 3. The 2026-11-07 admission fixes added five private slip
+helpers, the zero-payment branch and the stale-share pre-flight, raising the count from 403
+to 411 while keeping the maximum at 3.
 
 ## Rules
 

@@ -38,6 +38,37 @@ def main() -> int:
         A.cover('Slip@"policy"', "success")
         A.expect("slip points at the policy", actors.invoke(p.slip_uri, "policy"),
                  (True, policy_uri))
+
+        # --- revoked grant: bind prunes the dead share and stays recoverable ------
+        r = F.started("binding-revoked", syndicate_owner="key14")
+        grant, _ = r.subscribe()
+
+        A.cover('Syndicate@"revokeQuote"', "success")
+        A.expect_ok("manager revokes the grant", actors.invoke(
+            r.syndicate_uri, "revokeQuote", f'*dId, "{grant}"',
+            key=r.syndicate_owner))
+        A.expect("grant is revoked", r.quote_info().get("status"), "revoked")
+        A.expect("revoke frees capacity",
+                 r.syndicate_capacity().get("committed"), 0)
+
+        r.accept()
+        r.fund_premium()
+        A.cover('Slip@"bind"', "refusal")
+        A.expect_refusal("bind prunes the revoked share",
+                         actors.invoke(r.slip_uri, "bind"), "quote closed")
+        info = r.slip_info()
+        A.expect("revoked share removed", info.get("shares"), {})
+        A.expect("slip stays open", info.get("status"), "open")
+        A.expect("removed share is not lead",
+                 info.get("lead") != r.syndicate_id, True)
+        A.expect("removed share is not second",
+                 info.get("second") != r.syndicate_id, True)
+
+        A.cover('Slip@"subscribe"', "success")
+        r.subscribe()
+        A.expect("resubscribed", r.slip_info().get("status"), "subscribed")
+        A.expect("rebind returns a policy", r.bind().startswith("rho:id:"), True)
+        A.expect("slip bound after rebind", r.slip_info().get("status"), "bound")
     except Exception as error:
         print(f"binding suite failed: {error}", file=sys.stderr)
         A.finish("binding")

@@ -9,8 +9,10 @@ new
   deployerId(`rho:rchain:deployerId`),
   deployId(`rho:rchain:deployId`),
   rootCh, c, ack,
-  slipResolve, nowHeight, slipMake, slipShareSum, slipHasShare, slipLeadSecond,
-  slipOpenLines, slipExpireQuotes, mapKeys, slipReqOk, authOwner, slipStatus,
+  slipResolve, nowHeight, slipMake, slipShareSum, slipShareTotal, slipHasShare,
+  slipLeadSecond, slipOpenLines, slipStaleShares, slipDropShares, slipSharesState,
+  slipBindRefuseStale, slipBindConsumedRefuse,
+  slipExpireQuotes, mapKeys, slipReqOk, authOwner, slipStatus,
   slipSubscribe, slipFundDeposit, slipBindPolicy, slipRefund, authIsOwner,
   slipRefundPayments, slipRefundFacet, slipRefundMove,
   slipFundIssuer, slipFundAmount,
@@ -99,6 +101,18 @@ contract authIsOwner(dId, @ownerId, ret) = {
     }
   } |
 
+  contract slipShareTotal(@shares, ret) = {
+    new kCh in {
+      mapKeys!(shares, *kCh) |
+      for (@keys <- kCh) {
+        new ssCh in {
+          slipShareSum!(keys, 0, shares, 0, *ssCh) |
+          for (@sum <- ssCh) { ret!(sum) }
+        }
+      }
+    }
+  } |
+
   contract slipHasShare(@shares, @id, ret) = {
     match shares.get(id) {
       Nil => { ret!(false) }
@@ -167,6 +181,115 @@ contract authIsOwner(dId, @ownerId, ret) = {
         }
       }
     }
+  } |
+
+  contract slipStaleShares(@shares, @keys, @i, @stale, @consumed, ret) = {
+    if (i >= keys.length()) { ret!((stale, consumed)) }
+    else {
+      match keys.nth(i) {
+        k => {
+          match shares.get(k) {
+            Nil => { slipStaleShares!(shares, keys, i + 1, stale, consumed, *ret) }
+            s => {
+              new synCh in {
+                rl!(s.get("syndicate"), *synCh) |
+                for (Syndicate <- synCh) {
+                  new qCh in {
+                    Syndicate!("quote", s.get("grantId"), *qCh) |
+                    for (@q <- qCh) {
+                      match q {
+                        (true, quote) => {
+                          match quote.get("status") {
+                            "open" => {
+                              slipStaleShares!(shares, keys, i + 1, stale,
+                                               consumed, *ret)
+                            }
+                            "consumed" => {
+                              slipStaleShares!(shares, keys, i + 1, stale,
+                                               true, *ret)
+                            }
+                            _ => {
+                              slipStaleShares!(shares, keys, i + 1, stale ++ [k],
+                                               consumed, *ret)
+                            }
+                          }
+                        }
+                        _ => {
+                          slipStaleShares!(shares, keys, i + 1, stale ++ [k],
+                                           consumed, *ret)
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract slipDropShares(@shares, @drop, @i, ret) = {
+    if (i >= drop.length()) { ret!(shares) }
+    else {
+      match drop.nth(i) {
+        k => { slipDropShares!(shares.delete(k), drop, i + 1, *ret) }
+      }
+    }
+  } |
+
+  contract slipSharesState(@shares, ret) = {
+    new kCh in {
+      mapKeys!(shares, *kCh) |
+      for (@keys <- kCh) {
+        new ssCh in {
+          slipShareSum!(keys, 0, shares, 0, *ssCh) |
+          for (@sum <- ssCh) {
+            new lsCh in {
+              slipLeadSecond!(shares, keys, 0, Nil, Nil, 0, *lsCh) |
+              for (@ls <- lsCh) {
+                match ls {
+                  (lead, second) => {
+                    new stCh in {
+                      slipStatus!(sum, *stCh) |
+                      for (@st <- stCh) { ret!((lead, second, st)) }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract slipBindRefuseStale(@s, @stale, stateCell, ret) = {
+    new dCh in {
+      slipDropShares!(s.get("shares"), stale, 0, *dCh) |
+      for (@shares2 <- dCh) {
+        new stCh in {
+          slipSharesState!(shares2, *stCh) |
+          for (@st <- stCh) {
+            match st {
+              (lead, second, status2) => {
+                stateCell!(s.set("shares", shares2)
+                            .set("lead", lead)
+                            .set("second", second)
+                            .set("status", status2)
+                            .set("nonce", s.get("nonce") + 1)) |
+                ret!((false, "quote closed"))
+              }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract slipBindConsumedRefuse(@s, stateCell, ret) = {
+    stateCell!(s) | ret!((false, "quote consumed"))
   } |
 
   contract slipExpireQuotes(@keys, @i, @shares, ret) = {
@@ -280,8 +403,14 @@ contract authIsOwner(dId, @ownerId, ret) = {
                     if (has) {
                       ret!((false, "duplicate syndicate"))
                     } else {
-                      match s.get("terms").get("aggregateLimit") * shareBps / 10000 + 8 {
-                        exposureCap => {
+                      new capCh in {
+                        slipShareTotal!(s.get("shares"), *capCh) |
+                        for (@existing <- capCh) {
+                          if (existing + shareBps > 10000) {
+                            ret!((false, "share"))
+                          } else {
+                            match s.get("terms").get("aggregateLimit") * shareBps / 10000 + 8 {
+                              exposureCap => {
                           new qCh in {
                             Syndicate!("quote", *dId, s.get("class"), s.get("id"),
                                        shareBps, exposureCap, s.get("expiryHeight"),
@@ -330,6 +459,9 @@ contract authIsOwner(dId, @ownerId, ret) = {
                                 _ => { ret!(q) }
                               }
                             }
+                          }
+                        }
+                      }
                           }
                         }
                       }
@@ -808,20 +940,41 @@ contract authIsOwner(dId, @ownerId, ret) = {
                       if (sum != 10000) {
                         slipState!(s) | ret2!((false, "not fully subscribed"))
                       } else {
-                        match "pol:" ++ s.get("id") {
-                          policyId => {
-                            new bCh in {
-                              slipBindPolicy!(s, keys, policyId, *slipTokenV, *policyTokenV,
-                                              *claimTokenV, purseV, brandV, *bCh) |
-                              for (@r <- bCh) {
-                                match r {
-                                  (true, policyUri) => {
-                                    slipState!(s.set("status", "bound")
-                                                .set("policyUri", policyUri)
-                                                .set("nonce", s.get("nonce") + 1)) |
-                                    ret2!((true, policyUri))
+                        new liveCh in {
+                          slipStaleShares!(s.get("shares"), keys, 0, [], false,
+                                           *liveCh) |
+                          for (@check <- liveCh) {
+                            match check {
+                              (stale, consumed) => {
+                                if (consumed) {
+                                  slipBindConsumedRefuse!(s, *slipState, *ret2)
+                                } else {
+                                  if (stale.length() > 0) {
+                                    slipBindRefuseStale!(s, stale, *slipState, *ret2)
+                                  } else {
+                                    match "pol:" ++ s.get("id") {
+                                      policyId => {
+                                        new bCh in {
+                                          slipBindPolicy!(s, keys, policyId,
+                                                          *slipTokenV, *policyTokenV,
+                                                          *claimTokenV, purseV, brandV,
+                                                          *bCh) |
+                                          for (@r <- bCh) {
+                                            match r {
+                                              (true, policyUri) => {
+                                                slipState!(s.set("status", "bound")
+                                                            .set("policyUri", policyUri)
+                                                            .set("nonce",
+                                                                 s.get("nonce") + 1)) |
+                                                ret2!((true, policyUri))
+                                              }
+                                              _ => { slipState!(s) | ret2!(r) }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
                                   }
-                                  _ => { slipState!(s) | ret2!(r) }
                                 }
                               }
                             }

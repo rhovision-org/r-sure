@@ -28,6 +28,10 @@ notified -> classified -> assessed -> agreed -> settled -> closed
   r-cash deposit facet.
 
 A claim URI can be paid at most once by a line, and the policy records the paid claim once.
-If a syndicate purse is short, the line refuses before moving value; the settlement rolls back
-and the claim stays agreed. The central fund can cover a capped shortfall with 2-of-3
-signatures, after which a retried settlement pays only the remaining line shares.
+A payable of zero (an agreed amount within the deductible) or a line share that rounds to
+zero is a recorded zero payment: the line marks `paidFor[claimId] = 0`, moves no value, and
+the claim settles at zero with the aggregate unchanged. A second settlement is refused by the
+same terminal guards as a positive payout. If a syndicate purse is short, the line refuses
+before moving value; the settlement rolls back and the claim stays agreed. The central fund
+can cover a capped shortfall with 2-of-3 signatures, after which a retried settlement pays
+only the remaining line shares.
