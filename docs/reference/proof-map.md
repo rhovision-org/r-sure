@@ -20,6 +20,7 @@
 | INV-11 | `System.transfer`, `Linear.Cell.commit` | `system_step_atomic`, `system_step_refuses`, `commit_all_or_none`, `commit_keeps_held` | none | partial (ERTP assumed) |
 | INV-12 | pause boundary | `tools/check_pause_scope.py` | none | tool |
 | INV-13 | `Variance.risk_is_variance` | `risk_is_variance`, `ssNum_reflect`, `ssNum_shift`, `qualityVariance_le`, `loadedPremium_ge_expected`, `gapFlag_sound` | C-041..C-047 | covered (estimator boundary) |
+| INV-14 | `Curve.relativeVarianceGap` | `relativeVarianceGap_reflect`, `relativeVarianceGap_shift`, `l1Minus_nonneg`, `l1Plus_nonneg`, `maxDev_nonneg`, `signalPut_same`, `signalPut_stale`, `signalPut_replace` | none | model-only (curve boundary) |
 
 ## Cornerstone flows
 
@@ -108,6 +109,10 @@ the suite register. All 15 primitives are `covered` as model-only proofs.
 The variance flows are C-041..C-047 in `spec/flows/critical.yaml`; every target is a
 substantive theorem in `Model/Variance.lean`, and the arm register and suites join through
 `check_critical_path.py`.
+
+`Model/Curve.lean` carries the INV-14 curve-delta theorems and the signal nonce transition.
+It is a model-only extension: it is registered in `theorems.yaml` and the local reducer, but
+it is not yet joined to a critical-path claim.
 
 The composed settlement path `Claim -> Policy -> lines -> Fund` is modelled in
 `Model/System.lean` by `EngineState`/`settleEngine`. It calls the component

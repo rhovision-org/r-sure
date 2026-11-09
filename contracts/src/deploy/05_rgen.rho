@@ -10,7 +10,8 @@ new
   rootCh, c, ack,
   adminGuard, rgenResolve, rgenUri, resolveComponent,
   varianceDim, varianceQuality, varianceQuantity, varianceLiability, varianceCall,
-  varianceDeclared, varianceRoute,
+  varianceDeclared, varianceDeclaredScalar, varianceDeclaredCurve,
+  varianceCurveStats, varianceSummaryOk, varianceRoute,
   varianceStatusOk, varianceApproved, varianceFirstFailure, varianceVerdict,
   rgenApplyAction
 in {
@@ -153,7 +154,10 @@ in {
                       "qualitySum": qualitySum,
                       "verdict": verdict,
                       "status": "approved",
-                      "liabilityBps": share
+                      "liabilityBps": share,
+                      "curve": Nil,
+                      "curveStats": Nil,
+                      "declaredSummaryBps": Nil
                     }))
                   }
                   _ => { ret!(v) }
@@ -244,7 +248,79 @@ in {
     }
   } |
 
+  contract varianceSummaryOk(@q, @b, @n, ret) = {
+    if (q == Nil && b == Nil && n == Nil) {
+      ret!((true, Nil))
+    } else {
+      if (q == Nil || b == Nil || n == Nil || q < 0 || q > 10000
+          || b < 0 || b > 10000 || q + b > 10000 || n < 1) {
+        ret!((false, "variance"))
+      } else { ret!((true, q + b)) }
+    }
+  } |
+
+  contract varianceCurveStats(@curve, ret) = {
+    new mCh in {
+      resolveComponent!("component:suremath", *mCh) |
+      for (@m <- mCh) {
+        match m {
+          (true, SureMath) => {
+            new cCh in {
+              @SureMath!("curveStats", curve, *cCh) |
+              for (@c <- cCh) { ret!(c) }
+            }
+          }
+          _ => { ret!((false, "math unavailable")) }
+        }
+      }
+    }
+  } |
+
+  contract varianceDeclaredCurve(@v, @curve, @kassetUri, @state, @share, ret) = {
+    new sCh in {
+      varianceSummaryOk!(v.get("quantityBps"), v.get("qualityBps"), v.get("n"), *sCh) |
+      for (@summary <- sCh) {
+        match summary {
+          (false, reason) => { ret!((false, reason)) }
+          (true, declaredSummaryBps) => {
+            new cCh in {
+              varianceCurveStats!(curve, *cCh) |
+              for (@c <- cCh) {
+                match c {
+                  (true, stats) => {
+                    ret!((true, {
+                      "source": "kasset-curve",
+                      "kasset": kassetUri,
+                      "varianceBps": stats.get("varianceBps"),
+                      "quantity": state.get("quantity"),
+                      "qualitySum": Nil,
+                      "verdict": state.get("verdict"),
+                      "status": "approved",
+                      "liabilityBps": share,
+                      "declared": v,
+                      "curve": curve,
+                      "curveStats": stats,
+                      "declaredSummaryBps": declaredSummaryBps
+                    }))
+                  }
+                  _ => { ret!((false, "variance curve")) }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } |
+
   contract varianceDeclared(@v, @kassetUri, @state, @share, ret) = {
+    match v.get("curve") {
+      Nil => { varianceDeclaredScalar!(v, kassetUri, state, share, *ret) }
+      curve => { varianceDeclaredCurve!(v, curve, kassetUri, state, share, *ret) }
+    }
+  } |
+
+  contract varianceDeclaredScalar(@v, @kassetUri, @state, @share, ret) = {
     match (v.get("quantityBps"), v.get("qualityBps"), v.get("n")) {
       (q, b, n) => {
         if (q == Nil || b == Nil || n == Nil || q < 0 || q > 10000
@@ -255,7 +331,8 @@ in {
                        "varianceBps": q + b, "quantity": state.get("quantity"),
                        "qualitySum": Nil, "verdict": state.get("verdict"),
                        "status": "approved", "liabilityBps": share,
-                       "declared": v}))
+                       "declared": v, "curve": Nil, "curveStats": Nil,
+                       "declaredSummaryBps": q + b}))
         }
       }
     }

@@ -752,3 +752,64 @@ interfaces:
   hazards:
   - HZ-036
   findings: []
+- id: C-47
+  caller: Risk
+  callee: SureMath
+  arm: curveStats / curveDelta
+  call_site: 12_risk.rho riskEval
+  request: value curve and loss curve, toleranceBps, shapeToleranceBps
+  success_reply: (true, curve stats); (true, curve delta)
+  refusal_reply: (false, 'curve' | 'curve order' | 'curve unit' | 'tolerance')
+  awaits: component resolve and SureMath
+  state_held: riskState is peeked, then consumed with a nonce check
+  atomicity: read-only
+  capabilities: none
+  verdict: safe-by-inspection
+  hazards:
+  - HZ-036
+  findings: []
+- id: C-48
+  caller: RgenAdapter
+  callee: SureMath
+  arm: curveStats
+  call_site: 05_rgen.rho varianceDeclaredCurve
+  request: risk-curve/v1
+  success_reply: (true, curve stats)
+  refusal_reply: (false, 'curve' | 'curve order')
+  awaits: component resolve and SureMath
+  state_held: rgenState is peeked before the call
+  atomicity: read-only
+  capabilities: none
+  verdict: safe-by-inspection
+  hazards: []
+  findings: []
+- id: C-49
+  caller: VarianceSignalBook
+  callee: Risk
+  arm: info
+  call_site: 19_books.rho VarianceSignalBook register
+  request: none (read-only state peek)
+  success_reply: (true, risk state)
+  refusal_reply: n/a (unresolvable risk blocks)
+  awaits: registry lookup and Risk info before the book take
+  state_held: none; varianceSignalBookState is taken after the read
+  atomicity: read-only
+  capabilities: none
+  verdict: safe-by-inspection
+  hazards: []
+  findings: []
+- id: C-50
+  caller: VarianceSignalBook
+  callee: Clock
+  arm: now
+  call_site: 19_books.rho VarianceSignalBook register
+  request: none
+  success_reply: (true, height)
+  refusal_reply: (false, 'clock unavailable')
+  awaits: component resolve and Clock before the book take
+  state_held: none; varianceSignalBookState is taken after the read
+  atomicity: read-only
+  capabilities: none
+  verdict: safe-by-inspection
+  hazards: []
+  findings: []

@@ -29,7 +29,7 @@ the book chapters summarise them.
 | [registers/rca.yaml](registers/rca.yaml) | RCA-001 install, RCA-002 match state-loss and RCA-003 admission/terminal-state root causes |
 | [registers/experiments.yaml](registers/experiments.yaml) | 10 RCA experiments with artifacts |
 | [rca/template.md](rca/template.md) | RCA template |
-| [registers/theorems.yaml](registers/theorems.yaml) | 288 registered Lean component-model theorems |
+| [registers/theorems.yaml](registers/theorems.yaml) | 299 registered Lean component-model theorems |
 | [traceability/matrix.md](traceability/matrix.md) | generated arm/hazard/finding/test matrix |
 | [evidence/2026-11-05-install-rca/rca.md](evidence/2026-11-05-install-rca/rca.md) | readable install RCA |
 | [evidence/2026-11-05-install-rca/manifest.json](evidence/2026-11-05-install-rca/manifest.json) | `rsure.evidence/v2` install evidence manifest |

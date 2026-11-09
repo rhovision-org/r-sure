@@ -24,12 +24,20 @@ state.
 `RgenAdapter("variance", kassetUri, ret)` is the primary interoperation. It reads the
 K-Asset through the public `KAsset("get")` arm and returns
 `(true, {source, kasset, varianceBps, quantity, qualitySum, verdict, status,
-liabilityBps})`. When the K-Asset carries a `variance` snapshot from its value proposition
-the source is `"kasset-variance"`, `varianceBps` is `quantityBps + qualityBps`, and the
-snapshot is echoed as `declared`; `qualitySum` is `Nil` because the declared rate does not
-use the rubric. Without a snapshot the source is `"derived"` and the rubric formula below
-is used. The rate is `Var(value)/mean(value)^2` in bps; both paths are in
-[Variance is risk](../concepts/variance-is-risk.md).
+liabilityBps, curve, curveStats, declaredSummaryBps})`. When the K-Asset carries a
+`variance.curve` from its value proposition the source is `"kasset-curve"`, the curve and
+its stats are echoed, and `varianceBps` is the curve's variance rate. When it carries only
+the scalar `variance` snapshot the source is `"kasset-variance"`, `varianceBps` is
+`quantityBps + qualityBps`, and the snapshot is echoed as `declared`; `qualitySum` is `Nil`
+because the declared rate does not use the rubric. Without a snapshot the source is
+`"derived"` and the rubric formula below is used. The rate is `Var(value)/mean(value)^2` in
+bps; all paths are in [Variance is risk](../concepts/variance-is-risk.md).
+
+The optional curve is `risk-curve/v1`: exactly 16 nondecreasing integer points, each
+`0..10000`, in `unit: "bpsOfDeclaredValue"`, with `sum(points) > 0`. The adapter calls
+`SureMath("curveStats")`; a malformed curve refuses `"variance curve"`. The curve is a
+value-proposition convention, not core enforcement, and it remains optional so older
+K-Assets keep the scalar path.
 
 The conventions are versioned as **`kasset.conventions/v1`** and pinned to r-gen
 `c0ae67d`. The normative artifacts are `docs/src/reference/kasset-conventions.md`,

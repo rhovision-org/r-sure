@@ -1,6 +1,7 @@
 import RSure.Basic
 import RSure.Model.Math
 import RSure.Model.Variance
+import RSure.Model.Curve
 import RSure.Model.Terms
 import RSure.Model.Types
 import RSure.Model.Boundary

@@ -46,6 +46,7 @@ component:policy-factory
 component:claim-factory
 component:policy-book
 component:claim-book
+component:variance-signal-book
 ```
 
 Placeholders: `__ROOT_URI__`, `__ADMINS__`, `__THRESHOLD__`, `__RCASH_ROOT_URI__`,

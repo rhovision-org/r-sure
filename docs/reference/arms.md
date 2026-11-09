@@ -53,6 +53,11 @@
   (`setParams`, `setAdmins`).
 - `PolicyBook`: `register`, `policy`, `policies`, `byInsured`, `byBroker`, `bySlip`.
 - `ClaimBook`: `register`, `claim`, `claims`, `byPolicy`, `byInsured`.
+- `VarianceSignalBook`: `register`, `signal`, `signals`, `byAsset`, `byClass`, `bySource`,
+  `bySign`, `summary`.
+- `SureMath`: `share`, `premiumSplit`, `lineExposures`, `lineShares`, `payable`,
+  `settlePlan`, `varianceRate`, `varianceGap`, `loadedPremium`, `varianceStats`,
+  `curveStats`, `curveDelta`.
 
 ## Authority
 

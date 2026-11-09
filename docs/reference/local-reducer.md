@@ -1,20 +1,23 @@
 # Local reducer
 
 > **Status:** Implemented. Installs all 17 terms, drives a placement and claim to
-> settlement, and exercises the variance conversion; it is a development gate, not a
-> replacement for the devnet campaign.
+> settlement, and exercises the scalar and curve variance paths plus the signal book; it is
+> a development gate, not a replacement for the devnet campaign.
 
 `make local-reducer` runs the built contracts in the node's own in-memory `RhoRuntime`.
 No devnet, Docker or network is involved. The gate installs `contracts/build/*.rho` in the
 install order, then drives:
 
-1. `SureRoot.resolve` and every `math.*` and `variance.*` model vector through `SureMath`;
+1. `SureRoot.resolve`, every `math.*` and `variance.*` model vector through `SureMath`, and
+   a curve stats/delta check (including a reflection that leaves the variance numerator
+   unchanged);
 2. syndicate create, capital contribution and broker registration;
 3. risk submit and slip open;
 4. subscribe, accept, fund the premium and bind;
 5. claim open, classify, assess, agree, settle and close;
-6. a stub K-Asset through `RgenAdapter("variance")`, then a Risk assessment, signed gap and
-   acceptance acknowledgement.
+6. scalar and curve K-Asset stubs through `RgenAdapter("variance")`, a scalar Risk
+   assessment and a curve Risk assessment with a `lossCurve`, acceptance acknowledgement,
+   and `VarianceSignalBook` registration, summary and duplicate refusal.
 
 It then runs 24 refusal vectors and asserts the exact reason: bind one-shot, settle and
 classify after close, terminal agree and evidence, unknown component, duplicate register,
@@ -34,15 +37,16 @@ resolves, then submits `resumeAll` and checks that the write path is open again.
   bundle-content errors.
 - Registry and install wiring: every component must register under its key.
 - Call-shape and lifecycle errors: every step asserts a `true` reply and the expected
-  state at the end (21 components, claim `closed`, `paid` 800).
+  state at the end (22 components, claim `closed`, `paid` 800).
 - Refusal drift: a changed guard or reason string fails the run, so the negative paths are
   checked before the devnet campaign sees them.
 - Signature and pause scope: the 2-of-3 payload is signed and verified by the deployed
   `AdminGuard`; pause blocks writes, leaves reads available and resumes cleanly.
 - Model/contract drift: the 10 `math.*` and 15 `variance.*` vectors emitted by the Lean
   model (`spec/vectors/core.json`) are executed against the deployed `SureMath` and
-  compared. Sharing, split, payable and allocation arithmetic, the derived variance rate,
-  the gap flag and the loaded premium must agree with the model.
+  compared, and the curve stats/delta path is checked against `RSure.Model.Curve`. Sharing,
+  split, payable and allocation arithmetic, the derived variance rate, the gap flag, the
+  loaded premium and the reflection-invariant curve delta must agree with the model.
 
 It caught the funding term's missing `wdCh` binder class of defect before any deploy, and
 it is the first place a malformed install term or a deadlocked arm fails without bringing
@@ -67,14 +71,19 @@ local-reducer: resolve component:clock -> (true, `rho:id:…`, 1)
 local-reducer: suremath share(1000, 250) -> (true, 25, 975)
 local-reducer: 25 model vectors match SureMath
 local-reducer: kasset variance -> (true, {"varianceBps" : 4000, …})
+local-reducer: curve variance -> (true, {"source" : "kasset-curve", …})
 local-reducer: risk variance -> (true, {"gapBps" : 1000, "flagged" : false, …})
 local-reducer: variance acknowledged on accept
+local-reducer: variance signal -> (true, "rsk:…")
+local-reducer: variance signal summary -> (true, {"count" : 1, …})
+local-reducer: curve risk variance -> (true, {"curveSource" : "curve-curve", …})
+local-reducer: curve signal summary -> (true, {"count" : 2, …})
 local-reducer: bound slp:… -> (true, `rho:id:…`)
 local-reducer: claim … settled and closed
 local-reducer: refused bind is one-shot -> closed
 local-reducer: refused non-lead agree -> not lead
 local-reducer: pause and resume with two admin signatures
-local-reducer: root keys -> 21 components
+local-reducer: root keys -> 22 components
 ```
 
 ## Fixtures and limits
@@ -84,10 +93,11 @@ local-reducer: root keys -> 21 components
   a stub r-cash root with those capabilities before the install. The stub returns 6000 for
   a capital contribution, 1000 for `"premium:1000"`, and the requested amount on
   `withdraw`; it does not model ERTP conservation, balances or authority.
-- **Stub K-Asset.** The variance path reads a small contract that answers
-  `KAsset("get")` with an approved K-Asset state (quantity, quality, verdict, liability).
-  It exercises the same read and derivation as r-gen without installing r-gen; it does not
-  prove that a real r-gen approval has that shape.
+- **Stub K-Asset.** The variance path reads small contracts that answer `KAsset("get")`
+  with an approved K-Asset state (quantity, quality, verdict, liability), with and without
+  a declared `variance.curve`. It exercises the same read, derivation and curve stats as
+  r-gen without installing r-gen; it does not prove that a real r-gen approval has that
+  shape.
 - **Local admin keys.** The three admin keys are derived from deterministic secrets held in
   the reducer process. They are never used against a node; they exist so the 2-of-3 payload
   can be signed and verified locally. r-gen credentials and signatures are not modelled, so

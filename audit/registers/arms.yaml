@@ -812,6 +812,46 @@ arms:
   file: 19_books.rho
   source: contracts/src/deploy/19_books.rho
   visibility: public
+- component: VarianceSignalBook
+  arm: register
+  file: 19_books.rho
+  source: contracts/src/deploy/19_books.rho
+  visibility: public
+- component: VarianceSignalBook
+  arm: signal
+  file: 19_books.rho
+  source: contracts/src/deploy/19_books.rho
+  visibility: public
+- component: VarianceSignalBook
+  arm: signals
+  file: 19_books.rho
+  source: contracts/src/deploy/19_books.rho
+  visibility: public
+- component: VarianceSignalBook
+  arm: byAsset
+  file: 19_books.rho
+  source: contracts/src/deploy/19_books.rho
+  visibility: public
+- component: VarianceSignalBook
+  arm: byClass
+  file: 19_books.rho
+  source: contracts/src/deploy/19_books.rho
+  visibility: public
+- component: VarianceSignalBook
+  arm: bySource
+  file: 19_books.rho
+  source: contracts/src/deploy/19_books.rho
+  visibility: public
+- component: VarianceSignalBook
+  arm: bySign
+  file: 19_books.rho
+  source: contracts/src/deploy/19_books.rho
+  visibility: public
+- component: VarianceSignalBook
+  arm: summary
+  file: 19_books.rho
+  source: contracts/src/deploy/19_books.rho
+  visibility: public
 - component: Payments
   arm: health
   file: 40_payments.rho
@@ -864,6 +904,16 @@ arms:
   visibility: public
 - component: SureMath
   arm: varianceStats
+  file: 04_math.rho
+  source: contracts/src/deploy/04_math.rho
+  visibility: public
+- component: SureMath
+  arm: curveStats
+  file: 04_math.rho
+  source: contracts/src/deploy/04_math.rho
+  visibility: public
+- component: SureMath
+  arm: curveDelta
   file: 04_math.rho
   source: contracts/src/deploy/04_math.rho
   visibility: public

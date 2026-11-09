@@ -36,7 +36,35 @@ shift identity for the rate.
 vectors `variance.ss.*` and `variance.rate.*` run the same numbers through the deployed
 contract, so the model and the Rholang agree.
 
-## Two estimates, one visible gap
+## Two curves, one signal
+
+A K-Asset's variance is not a scalar. It is the shape of the value distribution. The risk
+an actuary prices is the shape of the loss distribution. Under full indemnity they are the
+same object: `L = C - V` is a shift or reflection, so the variance numerator is unchanged
+(`ssNum_shift`, `ssNum_reflect`, `risk_is_variance`). Both are carried as `risk-curve/v1`:
+
+```json
+{"kind": "quantiles", "unit": "bpsOfDeclaredValue", "n": 16,
+ "points": [p0, "...", p15]}
+```
+
+The 16 points are equiprobable positions in bps of the declared value. The K-Asset curve is
+the value proposition's snapshot; the actuarial curve is the assessment's `lossCurve`. The
+primary signal is the signed relative variance gap:
+
+```text
+relativeVarianceGapBps = (SS_loss - SS_value) * 10000 / SS_value
+```
+
+where `SS` is the variance numerator, not the rate. Shape and tail metrics use the mirrored
+alignment, so a reflection or a common shift is not a false difference. The mean gap is
+descriptive only. `VarianceSignalBook` publishes the result; it does not average the curves,
+rank them by who supplied them, or force a consensus. Disagreement is the signal.
+
+## Scalar summaries, one visible gap
+
+The scalar path below is the compatibility projection. When both curves are present, the
+curve delta is the signal; the scalar gap remains the legacy projection.
 
 An engineer and an insurer can reasonably disagree about variance. The design does not force
 one to win; it makes the disagreement visible.
@@ -49,13 +77,15 @@ one to win; it makes the disagreement visible.
   - `status == "approved"` with a non-nil `approval.liability` (the share is validated and
     recorded, but not used in the engineering rate).
   If the K-Asset carries a `variance` snapshot declared by its value proposition, that
-  declared rate is the engineering estimate; otherwise the rubric derivation below is the
-  fallback.
+  declared rate is the engineering estimate; if it carries a `variance.curve`, the curve and
+  its stats are recorded and the curve path is used. Otherwise the rubric derivation below is
+  the fallback.
 - **Attestation.** The insured may submit a variance record bound to a `rgen:kasset`
   evidence entry `{kind, uri, hash}`. The attestation overrides the derivation and the source
   is recorded; it is an off-chain engineering claim, not a proof.
-- **Insurer estimate.** `Risk.assess` requires an expected loss, the insurer's variance rate,
-  a load in bps and a basis hash. It records the insurer's view separately.
+- **Insurer estimate.** `Risk.assess` requires an expected loss, the insurer's variance rate
+  (or a `lossCurve` from which the rate is derived), a load in bps and a basis hash. It
+  records the insurer's view separately.
 
 The gap is signed:
 
@@ -64,9 +94,11 @@ gapBps = insurerBps - engineeringBps
 flagged = |gapBps| > toleranceBps     (default 2000 bps = 20 percentage points)
 ```
 
-`Risk("variance")` returns both estimates, the gap, the flag and the loaded minimum. The
-insured sees the difference before accepting. Acceptance records the acknowledgement; a
-decline is the discussion path. This is aimed at the common failure where an insurer with less
+`Risk("variance")` returns both estimates, the gap, the flag and the loaded minimum, plus the
+curve delta when both curves are present. `VarianceSignalBook` indexes the assessed risk and
+publishes the signed gap; it never sets a price. The insured sees the difference before
+accepting. Acceptance records the acknowledgement; a decline is the discussion path. This is
+aimed at the common failure where an insurer with less
 engineering knowledge loads a larger risk and the asset owner pays for it regardless of the
 quality of their QA: good QA lowers the engineering measure, and any remaining difference is
 an explicit, reviewable number rather than a silent margin.
@@ -155,13 +187,16 @@ A quoted premium of 1200 clears the floor. If the insurer had used 6500 bps, the
 
 ## What is proved, and what is assumed
 
-Proved in Lean over the shallow model (`RSure.Model.Variance`):
+Proved in Lean over the shallow model (`RSure.Model.Variance` and `RSure.Model.Curve`):
 
 - variance is invariant under shift and reflection, and scales by `c²`;
 - the derived rate is bounded under the rubric bounds and monotone in quality;
 - the declared rate is bounded by 10000 bps and the cross-repo fixture is exactly 1600;
 - the loaded premium never undercuts expected loss and is monotone in the rate;
 - the gap flag is exactly the tolerance comparison;
+- the relative variance gap is zero for a full-indemnity reflection and for a common shift;
+- the curve L1 components and maximum deviation are non-negative;
+- the signal book's nonce transition is duplicate, stale or replace, as the Risk nonce says;
 - a soundness statement joins the load bound and the gap flag.
 
 Assumed, and recorded in `spec/lean/claims.yaml`:

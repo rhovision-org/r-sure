@@ -280,6 +280,16 @@
       "depends_on": [
         "Claim"
       ]
+    },
+    "VarianceSignalBook": {
+      "file": "19_books.rho",
+      "state_cells": [
+        "varianceSignalBookState"
+      ],
+      "depends_on": [
+        "Risk",
+        "Clock"
+      ]
     }
   }
 }

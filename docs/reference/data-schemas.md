@@ -28,10 +28,29 @@ The optional submission `variance` attestation is
 `{source:"attested", kassetUri, varianceBps 0..10000, evidenceHash}` and must match an
 `rgen:kasset` evidence entry `{kind, uri, hash}`. The assessment (written by `Risk.assess`)
 carries `quotedPremium`, `expectedLoss`, `varianceBps`, `loadBps`, `basisHash`,
-`toleranceBps`, `engineering`, `gapBps`, `gapFlag`, `minimumPremium`, `by` and `at`. The
-`variance` read returns `{engineeringBps, insurerBps, gapBps, flagged, acknowledged, source,
-minimumPremium, expectedLoss}`; a flagged gap is visible before acceptance and acceptance
-sets `acknowledged`.
+`toleranceBps`, optional `shapeToleranceBps` and optional `lossCurve`, plus `engineering`,
+`eval`, `gapBps`, `gapFlag`, `minimumPremium`, `by` and `at`. The `variance` read returns
+`{engineeringBps, insurerBps, gapBps, flagged, acknowledged, source, minimumPremium,
+expectedLoss, pricingBps, rateClamped, curveDelta, curveFlagged, curveSource,
+engineeringCurve, engineeringCurveStats, lossCurve, lossCurveStats, kassetUri,
+declaredSummaryBps}`; a flagged gap is visible before acceptance and acceptance sets
+`acknowledged`.
+
+`risk-curve/v1` is `{kind:"quantiles", unit:"bpsOfDeclaredValue", n:16, points:[...]}`:
+16 nondecreasing integers `0..10000`, sum positive. The curve delta is
+`{relativeVarianceGapBps, rateGapBps, meanGapBps, shapeL1Bps, maxPointGapBps,
+maxDevGapBps, rateFlagged, varianceFlagged, shapeFlagged, tailFlagged, curveFlagged,
+denominatorZero, toleranceBps, shapeToleranceBps, engineering, insurer}`.
+
+## VarianceSignalBook
+
+`varianceSignalBookState` is `{signals, summary, nonce}`. `signals` is keyed by `riskId`
+and holds one current signal per risk: `{riskId, riskUri, nonce, insured, broker, class,
+assetHash, assetUri, kassetUri, declaredValue, valueSource, lossSource, source, sign,
+variance, assessmentBy, registeredAt, registeredBy}`. `summary` carries `count`, the signed
+and absolute gap sums, the shape and maximum-deviation sums, and positive/negative/zero,
+rateFlagged and curveFlagged counts. `register` versions by the Risk nonce: same → duplicate,
+lower → stale, higher → replace.
 
 ## Slip
 

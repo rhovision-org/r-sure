@@ -8,15 +8,15 @@
 
 | Area | Current state |
 |---|---|
-| Contracts | 17 deploy terms installed on devnet; 30 catalogue components and 19 state cells; static, parser, normalize and size gates pass. |
-| Formal model | 288 Lean theorems, 48 vectors, 58 flow rules and 11 `proved-model` core arms; 15 critical primitives covered. Claims register: 26 covered, 1 partial, 1 tool; 176 substantive theorems, 1 weak, 0 unaudited. |
-| Audit | 25 findings (22 fixed, 3 accepted boundaries), 36 hazards, 25 improvements; 30/30 concurrency reviews and 46/46 composition interfaces. |
-| Tests | 42 registered suites; 37 passing, 3 `not_run` process gates and 2 implemented static gates. The campaign records 38 runs, 438 assertions and 0 assertion failures. |
-| Coverage | 128/151 public arms (84.8%), 141/168 all registered arms (83.9%), 8/11 core-flow arms; 23/28 fixed findings have a passing regression suite. |
+| Contracts | 17 deploy terms installed on devnet; 31 catalogue components and 20 state cells; static, parser, normalize and size gates pass. |
+| Formal model | 299 Lean theorems, 48 vectors, 58 flow rules and 11 `proved-model` core arms; 15 critical primitives covered. Claims register: 27 covered, 1 partial, 1 tool; 184 substantive theorems, 1 weak, 0 unaudited. |
+| Audit | 31 findings (28 fixed, 3 accepted boundaries), 40 hazards, 33 improvements; 31/31 concurrency reviews and 46/46 composition interfaces. |
+| Tests | 44 registered suites; 37 passing, 5 `not_run` (3 process gates plus curve and signal) and 2 implemented static gates. The campaign records 38 runs, 438 assertions and 0 assertion failures. |
+| Coverage | 128/162 public arms, 141/179 all registered arms, 8/11 core-flow arms; 23/28 fixed findings have a passing regression suite. |
 | Web client | React/Vite app with wallet, reads, placement, policy, claim, fund and 2-of-3 admin flows; typecheck, Vitest, ESLint, production build and Playwright pass. |
 | Documentation | mdBook under `docs/`; `make docs-check` passes. |
 
-Measured 2026-11-06 from `deployments/suite-results.json`, the audit registers and the
+Measured 2026-11-09 from `deployments/suite-results.json`, the audit registers and the
 formal gate output. The coverage report is generated from the same results file.
 
 ## What is verified
@@ -33,7 +33,7 @@ placement from syndicate creation through claim settlement and close, with no de
 executes the 10 `math.*` and 15 `variance.*` model vectors against `SureMath`, drives the
 variance conversion from a stub K-Asset through assessment and acceptance, asserts 24
 refusal vectors with their exact reasons, signs a 2-of-3 pause and resume, pauses writes
-while reads stay available, and asserts that the root resolves all 21 components. See
+while reads stay available, and asserts that the root resolves all 22 components. See
 [Local reducer](../reference/local-reducer.md).
 
 The formal model proves the insurance economics over a shallow state model: capacity,

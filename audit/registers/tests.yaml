@@ -226,3 +226,19 @@ tests:
   focus: 'Static gate that every call to a locally defined contract passes the declared
     arity. A mismatched send does not reduce and stalls silently; the local reducer caught
     one such helper extraction. The gate reads both contracts/src and contracts/build.'
+- id: T-043
+  name: curve
+  file: harness/unit_curve.py
+  status: not_run
+  focus: 'Risk curves: the 16-point distribution, curveStats and curveDelta, reflection
+    invariance of the variance numerator and shape/tail metrics, the descriptive mean and
+    rate gaps, and malformed-curve refusals. The local reducer exercises the same vectors
+    and the curve risk path; the devnet suite is registered but not yet run.'
+- id: T-044
+  name: signal
+  file: harness/unit_signal.py
+  status: not_run
+  focus: 'VarianceSignalBook: register a signed Risk assessment, read it, index it by
+    asset/class/source/sign, summarise it, refuse a duplicate, and refuse an unassessed
+    risk. The local reducer exercises the scalar and curve paths; the devnet suite is
+    registered but not yet run.'

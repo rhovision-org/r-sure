@@ -2,13 +2,19 @@
 // Placeholders: __ROOT_URI__.
 new
   PolicyBook, policyBookState, ClaimBook, claimBookState,
+  VarianceSignalBook, varianceSignalBookState,
   rl(`rho:registry:lookup`),
   rs(`rho:registry:insertArbitrary`),
   deployerId(`rho:rchain:deployerId`),
   deployId(`rho:rchain:deployId`),
-  rootCh, c, ack,
-  bookAdd, bookList
+  rootCh, c, ack, signalUriCh,
+  bookAdd, bookList, bookKeys,
+  authOwner, authIsOwner, nowHeight, signalAbs, signalSource, signalSign,
+  signalSignIncs, signalFlagInc, signalSummaryDelta,
+  signalSummaryDeltaBuild, signalRecord, signalPut, signalCollect
 in {
+  // @@INLINE:lib/Auth.rho@@
+
   contract bookAdd(@m, @key, @value, ret) = {
     match m.get(key) {
       Nil => { ret!(m.set(key, [value])) }
@@ -20,6 +26,199 @@ in {
     match m.get(key) {
       Nil => { ret!([]) }
       xs => { ret!(xs) }
+    }
+  } |
+
+  contract bookKeys(@m, ret) = {
+    ret!(m.keys().toList())
+  } |
+
+  contract nowHeight(ret) = {
+    new rCh in {
+      rl!(`__ROOT_URI__`, *rCh) |
+      for (Root <- rCh) {
+        new kCh in {
+          Root!("resolve", "component:clock", 1, *kCh) |
+          for (@r <- kCh) {
+            match r {
+              (true, uri, _) => {
+                new cCh in {
+                  rl!(uri, *cCh) |
+                  for (Clock <- cCh) { Clock!("now", *ret) }
+                }
+              }
+              _ => { ret!((false, "clock unavailable")) }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract signalAbs(@x, ret) = {
+    if (x < 0) { ret!(0 - x) } else { ret!(x) }
+  } |
+
+  contract signalSource(@curve, @fallback, ret) = {
+    match curve {
+      Nil => { ret!(fallback) }
+      _ => { ret!("curve") }
+    }
+  } |
+
+  contract signalSign(@gap, ret) = {
+    if (gap > 0) { ret!("positive") }
+    else {
+      if (gap < 0) { ret!("negative") }
+      else { ret!("zero") }
+    }
+  } |
+
+  contract signalSignIncs(@sign, ret) = {
+    match sign {
+      "positive" => { ret!((1, 0, 0)) }
+      "negative" => { ret!((0, 1, 0)) }
+      _ => { ret!((0, 0, 1)) }
+    }
+  } |
+
+  contract signalFlagInc(@flag, ret) = {
+    if (flag == true) { ret!(1) } else { ret!(0) }
+  } |
+
+  contract signalSummaryDelta(@summary, @variance, @dir, ret) = {
+    match variance.get("curveDelta") {
+      Nil => {
+        signalSummaryDeltaBuild!(summary, variance, 0, 0, 0, false, dir, *ret)
+      }
+      delta => {
+        signalSummaryDeltaBuild!(summary, variance,
+          delta.get("relativeVarianceGapBps"),
+          delta.get("shapeL1Bps"),
+          delta.get("maxDevGapBps"),
+          delta.get("curveFlagged"), dir, *ret)
+      }
+    }
+  } |
+
+  contract signalSummaryDeltaBuild(@summary, @variance, @rel, @shape, @dev,
+                                   @curveFlagged, @dir, ret) = {
+    new gapCh, relCh, devCh, signCh, rateFlagCh, curveFlagCh, incCh in {
+      signalAbs!(variance.get("gapBps"), *gapCh) |
+      signalAbs!(rel, *relCh) |
+      signalAbs!(dev, *devCh) |
+      signalSign!(variance.get("gapBps"), *signCh) |
+      signalFlagInc!(variance.get("flagged"), *rateFlagCh) |
+      signalFlagInc!(curveFlagged, *curveFlagCh) |
+      for (@absGap <- gapCh; @absRel <- relCh; @absDev <- devCh;
+           @sign <- signCh; @rateInc <- rateFlagCh; @curveInc <- curveFlagCh) {
+        signalSignIncs!(sign, *incCh) |
+        for (@incs <- incCh) {
+          match incs {
+            (posInc, negInc, zeroInc) => {
+              ret!(summary
+                .set("count", summary.get("count") + dir)
+                .set("sumGapBps", summary.get("sumGapBps") + dir * variance.get("gapBps"))
+                .set("sumAbsGapBps", summary.get("sumAbsGapBps") + dir * absGap)
+                .set("sumRelativeGapBps", summary.get("sumRelativeGapBps") + dir * rel)
+                .set("sumAbsRelativeGapBps", summary.get("sumAbsRelativeGapBps") + dir * absRel)
+                .set("sumShapeL1Bps", summary.get("sumShapeL1Bps") + dir * shape)
+                .set("sumAbsMaxDevGapBps", summary.get("sumAbsMaxDevGapBps") + dir * absDev)
+                .set("positive", summary.get("positive") + dir * posInc)
+                .set("negative", summary.get("negative") + dir * negInc)
+                .set("zero", summary.get("zero") + dir * zeroInc)
+                .set("rateFlagged", summary.get("rateFlagged") + dir * rateInc)
+                .set("curveFlagged", summary.get("curveFlagged") + dir * curveInc))
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract signalRecord(@riskUri, @s, @variance, @who, @height, @valueSource,
+                        @lossSource, @sign, ret) = {
+    ret!({
+      "riskId": s.get("id"),
+      "riskUri": riskUri,
+      "nonce": s.get("nonce"),
+      "insured": s.get("insured"),
+      "broker": s.get("broker"),
+      "class": s.get("class"),
+      "assetHash": s.get("assetRef").get("hash"),
+      "assetUri": s.get("assetRef").get("uri"),
+      "kassetUri": variance.get("kassetUri"),
+      "declaredValue": s.get("declaredValue"),
+      "valueSource": valueSource,
+      "lossSource": lossSource,
+      "source": variance.get("curveSource"),
+      "sign": sign,
+      "variance": variance,
+      "assessmentBy": s.get("assessment").get("by"),
+      "registeredAt": height,
+      "registeredBy": who
+    })
+  } |
+
+  contract signalPut(@riskId, @nonce, @record, @variance, ret) = {
+    for (@b <- varianceSignalBookState) {
+      match b.get("signals").get(riskId) {
+        Nil => {
+          new sumCh in {
+            signalSummaryDelta!(b.get("summary"), variance, 1, *sumCh) |
+            for (@summary <- sumCh) {
+              varianceSignalBookState!(b.set("signals", b.get("signals").set(riskId, record))
+                .set("summary", summary)
+                .set("nonce", b.get("nonce") + 1)) |
+              ret!((true, riskId))
+            }
+          }
+        }
+        old => {
+          if (nonce == old.get("nonce")) {
+            varianceSignalBookState!(b) |
+            ret!((false, "duplicate"))
+          } else {
+            if (nonce < old.get("nonce")) {
+              varianceSignalBookState!(b) |
+              ret!((false, "stale"))
+            } else {
+              new subCh, addCh in {
+                signalSummaryDelta!(b.get("summary"), old.get("variance"), 0 - 1, *subCh) |
+                for (@summary1 <- subCh) {
+                  signalSummaryDelta!(summary1, variance, 1, *addCh) |
+                  for (@summary2 <- addCh) {
+                    varianceSignalBookState!(b.set("signals", b.get("signals").set(riskId, record))
+                      .set("summary", summary2)
+                      .set("nonce", b.get("nonce") + 1)) |
+                    ret!((true, riskId))
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract signalCollect(@keys, @i, @signals, @field, @value, @acc, ret) = {
+    if (i >= keys.length()) { ret!((true, acc)) }
+    else {
+      match keys.nth(i) {
+        k => {
+          match signals.get(k) {
+            Nil => { signalCollect!(keys, i + 1, signals, field, value, acc, *ret) }
+            s => {
+              if (s.get(field) == value) {
+                signalCollect!(keys, i + 1, signals, field, value, acc ++ [k], *ret)
+              } else {
+                signalCollect!(keys, i + 1, signals, field, value, acc, *ret)
+              }
+            }
+          }
+        }
+      }
     }
   } |
 
@@ -175,6 +374,126 @@ in {
     }
   } |
 
+  contract VarianceSignalBook(@"register", @riskUri, ret) = {
+    new aCh in {
+      authOwner!(*deployerId, *aCh) |
+      for (@(true, who) <- aCh) {
+        new rCh in {
+          rl!(riskUri, *rCh) |
+          for (Risk <- rCh) {
+            new iCh in {
+              Risk!("info", *iCh) |
+              for (@i <- iCh) {
+                match i {
+                  (true, s) => {
+                    if (s.get("id") == Nil) { ret!((false, "risk")) }
+                    else {
+                      match s.get("variance") {
+                        Nil => { ret!((false, "not assessed")) }
+                        variance => {
+                          new hCh, vCh, lCh, signCh in {
+                            nowHeight!(*hCh) |
+                            signalSource!(variance.get("engineeringCurve"),
+                                          variance.get("source"), *vCh) |
+                            signalSource!(variance.get("lossCurve"), "summary", *lCh) |
+                            signalSign!(variance.get("gapBps"), *signCh) |
+                            for (@h <- hCh; @valueSource <- vCh;
+                                 @lossSource <- lCh; @sign <- signCh) {
+                              match h {
+                                (true, height) => {
+                                  new recCh in {
+                                    signalRecord!(riskUri, s, variance, who, height,
+                                                  valueSource, lossSource, sign, *recCh) |
+                                    for (@record <- recCh) {
+                                      signalPut!(s.get("id"), s.get("nonce"), record,
+                                                 variance, *ret)
+                                    }
+                                  }
+                                }
+                                _ => { ret!((false, "clock unavailable")) }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  _ => { ret!((false, "risk unavailable")) }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract VarianceSignalBook(@"signal", @riskId, ret) = {
+    for (@b <<- varianceSignalBookState) {
+      match b.get("signals").get(riskId) {
+        Nil => { ret!((false, "unknown signal")) }
+        s => { ret!((true, s)) }
+      }
+    }
+  } |
+
+  contract VarianceSignalBook(@"signals", ret) = {
+    for (@b <<- varianceSignalBookState) {
+      new kCh in {
+        bookKeys!(b.get("signals"), *kCh) |
+        for (@keys <- kCh) { ret!((true, keys)) }
+      }
+    }
+  } |
+
+  contract VarianceSignalBook(@"byAsset", @assetHash, ret) = {
+    for (@b <<- varianceSignalBookState) {
+      new kCh in {
+        bookKeys!(b.get("signals"), *kCh) |
+        for (@keys <- kCh) {
+          signalCollect!(keys, 0, b.get("signals"), "assetHash", assetHash, [], *ret)
+        }
+      }
+    }
+  } |
+
+  contract VarianceSignalBook(@"byClass", @class, ret) = {
+    for (@b <<- varianceSignalBookState) {
+      new kCh in {
+        bookKeys!(b.get("signals"), *kCh) |
+        for (@keys <- kCh) {
+          signalCollect!(keys, 0, b.get("signals"), "class", class, [], *ret)
+        }
+      }
+    }
+  } |
+
+  contract VarianceSignalBook(@"bySource", @source, ret) = {
+    for (@b <<- varianceSignalBookState) {
+      new kCh in {
+        bookKeys!(b.get("signals"), *kCh) |
+        for (@keys <- kCh) {
+          signalCollect!(keys, 0, b.get("signals"), "source", source, [], *ret)
+        }
+      }
+    }
+  } |
+
+  contract VarianceSignalBook(@"bySign", @sign, ret) = {
+    for (@b <<- varianceSignalBookState) {
+      new kCh in {
+        bookKeys!(b.get("signals"), *kCh) |
+        for (@keys <- kCh) {
+          signalCollect!(keys, 0, b.get("signals"), "sign", sign, [], *ret)
+        }
+      }
+    }
+  } |
+
+  contract VarianceSignalBook(@"summary", ret) = {
+    for (@b <<- varianceSignalBookState) { ret!((true, b.get("summary"))) }
+  } |
+
   policyBookState!({
     "policies": {}, "byInsured": {}, "byBroker": {}, "bySlip": {},
     "nonce": 0
@@ -183,16 +502,36 @@ in {
     "claims": {}, "byInsured": {}, "byPolicy": {},
     "nonce": 0
   }) |
+  varianceSignalBookState!({
+    "signals": {},
+    "summary": {
+      "count": 0,
+      "sumGapBps": 0,
+      "sumAbsGapBps": 0,
+      "sumRelativeGapBps": 0,
+      "sumAbsRelativeGapBps": 0,
+      "sumShapeL1Bps": 0,
+      "sumAbsMaxDevGapBps": 0,
+      "positive": 0,
+      "negative": 0,
+      "zero": 0,
+      "rateFlagged": 0,
+      "curveFlagged": 0
+    },
+    "nonce": 0
+  }) |
 
   rl!(`__ROOT_URI__`, *rootCh) |
   for (Root <- rootCh) {
     rs!(bundle+{*PolicyBook}, *c) |
     rs!(bundle+{*ClaimBook}, *ack) |
-    for (@u1 <- c; @u2 <- ack) {
-      new a1, a2 in {
+    rs!(bundle+{*VarianceSignalBook}, *signalUriCh) |
+    for (@u1 <- c; @u2 <- ack; @u3 <- signalUriCh) {
+      new a1, a2, a3 in {
         Root!("register", "component:policy-book", u1, 1, "book", *deployerId, *a1) |
         Root!("register", "component:claim-book", u2, 1, "book", *deployerId, *a2) |
-        for (@r1 <- a1; @r2 <- a2) { deployId!([u1, u2]) }
+        Root!("register", "component:variance-signal-book", u3, 1, "book", *deployerId, *a3) |
+        for (@r1 <- a1; @r2 <- a2; @r3 <- a3) { deployId!([u1, u2, u3]) }
       }
     }
   }

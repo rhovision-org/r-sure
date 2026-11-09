@@ -813,3 +813,29 @@ components:
   - contracts/src/deploy/19_books.rho
   findings:
   - F-005
+- component: VarianceSignalBook
+  file: 19_books.rho
+  kind: singleton
+  state_cells:
+  - varianceSignalBookState
+  cross_cell_writers: []
+  writers:
+  - register
+  readers:
+  - signal
+  - signals
+  - byAsset
+  - byClass
+  - bySource
+  - bySign
+  - summary
+  awaits_while_holding_state: []
+  value_moves: []
+  bundle_publication: top-level, closed
+  replay_guard: nonce
+  verdict: safe-by-inspection
+  review: reviews/VarianceSignalBook.md
+  hazards: []
+  evidence:
+  - contracts/src/deploy/19_books.rho
+  findings: []
