@@ -1,0 +1,37 @@
+{
+  "name": "@rsure/exo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "r-sure's insurance market as exos in a toybox zone",
+  "license": "AGPL-3.0-only",
+  "packageManager": "yarn@4.18.1",
+  "scripts": {
+    "test": "node --import @vattr/toybox/src/node-lockdown.js --import ts-blank-space/register --test test/*.test.js",
+    "typecheck": "tsc -p . --noEmit",
+    "format-check": "prettier --check ."
+  },
+  "dependencies": {
+    "@agoric/ertp": "0.16.3-dev-dc67c18.0.dc67c18",
+    "@endo/far": "^1.1.14"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261006.1",
+    "@types/better-sqlite3": "^7.6.1",
+    "@types/node": "22",
+    "@vattr/ertp-books": "https://github.com/dckc/vattr97.git#workspace=@vattr/ertp-books&commit=c0fb2c53d3d19e5555eedf6f4936d8a324737608",
+    "@vattr/toybox": "https://github.com/dckc/vattr97.git#workspace=@vattr/toybox&commit=c0fb2c53d3d19e5555eedf6f4936d8a324737608",
+    "prettier": "^3.8.1",
+    "ses": "^2.2.0",
+    "ts-blank-space": "^0.9.0",
+    "typescript": "^5.5.0"
+  },
+  "resolutions": {
+    "@vattr/toybox": "https://github.com/dckc/vattr97.git#workspace=@vattr/toybox&commit=c0fb2c53d3d19e5555eedf6f4936d8a324737608"
+  },
+  "dependenciesMeta": {
+    "better-sqlite3": {
+      "built": true
+    }
+  }
+}

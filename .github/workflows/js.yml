@@ -1,0 +1,53 @@
+name: js sibling port (advisory)
+
+# Advisory CI for the js/ port only. This is outside the rholo gates in ci.yml
+# and must not become a required check: the path filters mean it legitimately
+# does not run on unrelated changes.
+#
+# It runs on pull requests that touch js/, including PRs from forks, with a
+# read-only token and no secrets. It does not need pull_request_target.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'js/**'
+      - '.github/workflows/js.yml'
+  pull_request:
+    paths:
+      - 'js/**'
+      - '.github/workflows/js.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: js-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: js
+
+jobs:
+  js:
+    name: js (advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+      YARN_ENABLE_TELEMETRY: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install
+        run: yarn install --immutable
+      - name: Typecheck
+        run: yarn typecheck
+      - name: Test
+        run: yarn test

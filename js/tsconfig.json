@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "module": "node16",
+    "moduleResolution": "node16",
+    "strict": true,
+    // @agoric/ertp's types need it off: under it, Brand<'nat'> is no Brand
+    "strictFunctionTypes": false,
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true,
+    "skipLibCheck": true,
+    "maxNodeModuleJsDepth": 2,
+    "lib": ["es2024"],
+    "types": ["@cloudflare/workers-types", "node"],
+    "paths": {
+      // node's own, not the npm package better-sqlite3's install tools bring
+      "string_decoder": ["./node_modules/@types/node/string_decoder.d.ts"]
+    }
+  },
+  "include": ["src/**/*.js", "test/**/*.js", "globals.d.ts"]
+}
