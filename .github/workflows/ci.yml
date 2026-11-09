@@ -101,7 +101,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: rhovision-org/r-gen
-          ref: 639d0f2b2ddcb4cc2f90186b4b7ad82b296fc008
+          ref: c0ae67d4a493800ce1f8787800f725d9f768f6b5
           path: RGen
       - uses: actions/checkout@v4
         with:

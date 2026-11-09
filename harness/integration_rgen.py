@@ -48,6 +48,46 @@ new rs(`rho:registry:insertArbitrary`), uriCh, deployId(`rho:rchain:deployId`), 
         A.expect("quality sum is reported", derived[1].get("qualitySum"), 12)
         A.expect("source is recorded", derived[1].get("source"), "derived")
 
+        # A value proposition declares its variance; the claim snapshots it and the
+        # K-Asset carries the snapshot, so the read uses the declared rate directly.
+        declared = A.one("""
+new rs(`rho:registry:insertArbitrary`), uriCh, deployId(`rho:rchain:deployId`), KAsset in {
+  contract KAsset(@"get", ret) = {
+    ret!((true, {"quantity": {"unit": "m3", "value": 100},
+                 "quality": {"completeness": 3, "correctness": 3,
+                             "traceability": 3, "fitness": 3},
+                 "variance": {"quantityBps": 400, "qualityBps": 1200, "n": 30},
+                 "verdict": "valid", "status": "approved",
+                 "approval": {"liability": {"responsible": "approver",
+                                            "shareBps": 10000}}}))
+  } |
+  rs!(bundle+{*KAsset}, *uriCh) |
+  for (@u <- uriCh) { deployId!(u) }
+}""")
+        stated = actors.invoke(rgen, "variance", f'"{declared}"')
+        A.expect_ok("declared variance read", stated)
+        A.expect("declared rate is used", stated[1].get("varianceBps"), 1600)
+        A.expect("declared source is recorded", stated[1].get("source"),
+                 "kasset-variance")
+        A.expect("declared snapshot is echoed", stated[1].get("declared").get("n"), 30)
+
+        malformed = A.one("""
+new rs(`rho:registry:insertArbitrary`), uriCh, deployId(`rho:rchain:deployId`), KAsset in {
+  contract KAsset(@"get", ret) = {
+    ret!((true, {"quantity": {"unit": "m3", "value": 100},
+                 "quality": {"completeness": 3, "correctness": 3,
+                             "traceability": 3, "fitness": 3},
+                 "variance": {"quantityBps": 6000, "qualityBps": 6000, "n": 30},
+                 "verdict": "valid", "status": "approved",
+                 "approval": {"liability": {"responsible": "approver",
+                                            "shareBps": 10000}}}))
+  } |
+  rs!(bundle+{*KAsset}, *uriCh) |
+  for (@u <- uriCh) { deployId!(u) }
+}""")
+        A.expect_refusal("declared rates must sum to at most 10000 bps",
+                         actors.invoke(rgen, "variance", f'"{malformed}"'), "variance")
+
         unapproved = A.one("""
 new rs(`rho:registry:insertArbitrary`), uriCh, deployId(`rho:rchain:deployId`), KAsset in {
   contract KAsset(@"get", ret) = {

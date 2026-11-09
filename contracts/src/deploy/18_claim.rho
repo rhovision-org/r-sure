@@ -400,7 +400,8 @@ in {
                           for (@o <- oCh) {
                             match o {
                               (true, OracleFactory) => {
-                                new applyCap, applyRet in {
+                                new applyCap, applyRet, proofState, Proof,
+                                    proofCh, boundReq, ooCh in {
                                   contract applyCap(@"applyDecision", @caseId,
                                                     @decision, ret3) = {
                                     for (@s2 <- claimState) {
@@ -419,9 +420,29 @@ in {
                                       }
                                     }
                                   } |
-                                  new ooCh in {
-                                    @OracleFactory!("open", *dId2, s.get("uri"),
-                                                    caseReq, *applyCap, *ooCh) |
+                                  boundReq!(caseReq.set("openedBy", who)) |
+                                  for (@req <- boundReq) {
+                                    proofState!({
+                                      "data": {
+                                        "subjectRef": s.get("uri"),
+                                        "subjectUri": s.get("uri").toString(),
+                                        "parties": [s.get("insured"), s.get("broker")],
+                                        "discipline": req.get("discipline"),
+                                        "jurisdiction": req.get("jurisdiction")},
+                                      "used": false}) |
+                                    contract Proof(@"take", ret3) = {
+                                      for (@p <- proofState) {
+                                        if (p.get("used")) {
+                                          proofState!(p) | ret3!((false, "used"))
+                                        } else {
+                                          proofState!(p.set("used", true)) |
+                                          ret3!((true, p.get("data")))
+                                        }
+                                      }
+                                    } |
+                                    proofCh!(bundle+{*Proof}) |
+                                    @OracleFactory!("openBound", *dId2, *proofCh,
+                                                    req, *applyCap, *ooCh) |
                                     for (@oo <- ooCh) {
                                       match oo {
                                         (true, case) => {

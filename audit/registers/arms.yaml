@@ -734,6 +734,11 @@ arms:
   file: 18_claim.rho
   source: contracts/src/deploy/18_claim.rho
   visibility: public
+- component: Proof
+  arm: take
+  file: 18_claim.rho
+  source: contracts/src/deploy/18_claim.rho
+  visibility: public
 - component: Claim
   arm: settle
   file: 18_claim.rho

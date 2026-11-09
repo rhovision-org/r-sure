@@ -1004,6 +1004,45 @@ async fn run() -> Result<(), Error> {
     }
     println!("local-reducer: kasset variance -> {derived}");
 
+    // A value proposition declares its variance; the claim snapshots it and the
+    // K-Asset carries it, so the adapter reads the declared rate instead of deriving.
+    let declared_stub = r#"new rs(`rho:registry:insertArbitrary`), uriCh,
+    deployId(`rho:rchain:deployId`), KAsset in {
+  contract KAsset(@"get", ret) = {
+    ret!((true, {
+      "id": "rho:id:local-kasset-declared",
+      "quantity": {"unit": "m3", "value": 100},
+      "quality": {"completeness": 3, "correctness": 3,
+                  "traceability": 3, "fitness": 3},
+      "variance": {"quantityBps": 400, "qualityBps": 1200, "n": 30},
+      "verdict": "valid",
+      "status": "approved",
+      "approval": {"decision": "approve",
+                   "liability": {"responsible": "approver", "shareBps": 10000}}
+    }))
+  } |
+  rs!(bundle+{*KAsset}, *uriCh) |
+  for (@u <- uriCh) { deployId!([u]) }
+}"#;
+    let declared_reply = reducer.deploy(declared_stub).await?.join(" ");
+    let declared_uri = find_uri(&declared_reply)
+        .ok_or_else(|| std::io::Error::other(format!("declared stub: {declared_reply}")))?;
+    let declared = reducer
+        .component_call(
+            &root,
+            "component:rgen",
+            "variance",
+            &format!(r#", "{declared_uri}""#),
+        )
+        .await?;
+    if !declared.contains("true")
+        || !declared.contains("kasset-variance")
+        || !declared.contains("1600")
+    {
+        return Err(std::io::Error::other(format!("declared variance: {declared}")).into());
+    }
+    println!("local-reducer: declared variance -> {declared}");
+
     let risk_req = format!(
         r#", *dId, {{"class": "property", "assetRef": {{"kind": "site", "hash": "asset:local", "uri": "{kasset_uri}"}}, "evidence": [{{"kind": "rgen:kasset", "uri": "{kasset_uri}", "hash": "kasset:local"}}], "triTest": {{"exposureRef": "exposure:local", "probabilityBasis": "claims-history", "consequenceBasis": "declared-value", "consequenceRef": "consequence:local"}}, "periodStart": 0, "periodEnd": 1000000, "declaredValue": 5000, "requestedLimit": 1000, "requestedDeductible": 0}}"#
     );

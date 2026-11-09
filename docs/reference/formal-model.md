@@ -6,7 +6,7 @@
 
 ## What is proved
 
-The Lean project at `spec/lean` contains 285 kernel-checked theorems over the insurance
+The Lean project at `spec/lean` contains 288 kernel-checked theorems over the insurance
 economics. They answer five questions:
 
 1. **Can the promise be backed?** Capacity, quote reservation, open-line and loss payment

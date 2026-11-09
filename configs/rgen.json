@@ -1,5 +1,5 @@
 {
-  "pinned_commit": "639d0f2b2ddcb4cc2f90186b4b7ad82b296fc008",
+  "pinned_commit": "c0ae67d4a493800ce1f8787800f725d9f768f6b5",
   "min_version": 1,
   "manifest": "../RGen/deployments/devnet.json",
   "required_components": [

@@ -10,6 +10,7 @@ new
   rootCh, c, ack,
   adminGuard, rgenResolve, rgenUri, resolveComponent,
   varianceDim, varianceQuality, varianceQuantity, varianceLiability, varianceCall,
+  varianceDeclared, varianceRoute,
   varianceStatusOk, varianceApproved, varianceFirstFailure, varianceVerdict,
   rgenApplyAction
 in {
@@ -101,7 +102,8 @@ contract adminGuard(@domain, @nonce, @action, @args, @sigs,
   // K-Asset conventions are validated here: r-gen stores quality/quantity/liability
   // as conventions, not core-enforced shapes. Approval is required; a validated or
   // conditional K-Asset has no liability record, so derivation refuses and the
-  // bound variance attestation is the fallback.
+  // bound variance attestation is the fallback. A value-proposition variance snapshot
+  // is used as declared; without one the quality rubric derives the rate.
   contract varianceDim(@v, ret) = {
     match v {
       1 => { ret!(1) }
@@ -280,6 +282,30 @@ contract adminGuard(@domain, @nonce, @action, @args, @sigs,
     }
   } |
 
+  contract varianceDeclared(@v, @kassetUri, @state, @share, ret) = {
+    match (v.get("quantityBps"), v.get("qualityBps"), v.get("n")) {
+      (q, b, n) => {
+        if (q == Nil || b == Nil || n == Nil || q < 0 || q > 10000
+            || b < 0 || b > 10000 || q + b > 10000 || n < 1) {
+          ret!((false, "variance"))
+        } else {
+          ret!((true, {"source": "kasset-variance", "kasset": kassetUri,
+                       "varianceBps": q + b, "quantity": state.get("quantity"),
+                       "qualitySum": Nil, "verdict": state.get("verdict"),
+                       "status": "approved", "liabilityBps": share,
+                       "declared": v}))
+        }
+      }
+    }
+  } |
+
+  contract varianceRoute(@s, @qualitySum, @share, @kassetUri, ret) = {
+    match s.get("variance") {
+      Nil => { varianceVerdict!(s, qualitySum, share, kassetUri, *ret) }
+      v => { varianceDeclared!(v, kassetUri, s, share, *ret) }
+    }
+  } |
+
   contract varianceVerdict(@s, @qualitySum, @share, @kassetUri, ret) = {
     match s.get("verdict") {
       "valid" => {
@@ -300,7 +326,7 @@ contract adminGuard(@domain, @nonce, @action, @args, @sigs,
       for (@q <- qCh; @n <- nCh; @l <- lCh) {
         match (q, n, l) {
           ((true, qualitySum), (true, _), (true, share)) => {
-            varianceVerdict!(s, qualitySum, share, kassetUri, *ret)
+            varianceRoute!(s, qualitySum, share, kassetUri, *ret)
           }
           _ => { varianceFirstFailure!(q, n, l, *ret) }
         }

@@ -1,7 +1,7 @@
 {
   "schema": "rshare.traceability/v1",
   "summary": {
-    "arms": 168,
+    "arms": 169,
     "arms_with_flow_rule": 11,
     "arms_with_hazard": 27,
     "hazards": 40,
@@ -2049,6 +2049,19 @@
     {
       "component": "applyCap",
       "arm": "applyDecision",
+      "source": "contracts/src/deploy/18_claim.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "Proof",
+      "arm": "take",
       "source": "contracts/src/deploy/18_claim.rho",
       "visibility": "public",
       "flow_rule": null,

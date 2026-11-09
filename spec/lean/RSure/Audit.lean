@@ -306,3 +306,6 @@ import RSure.Linear.Protocol
 #print axioms RSure.Model.Variance.variance_sound
 #print axioms RSure.Model.Variance.variance_refuses_bad_input
 #print axioms RSure.Model.Variance.variance_reachable
+#print axioms RSure.Model.Variance.declaredVariance_le_10000
+#print axioms RSure.Model.Variance.declaredVariance_refuses_overflow
+#print axioms RSure.Model.Variance.declaredVariance_fixture
