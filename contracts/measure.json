@@ -32,9 +32,9 @@
       "contracts": 7
     },
     "05_rgen.rho": {
-      "bytes": 9471,
+      "bytes": 10262,
       "depth": 19,
-      "contracts": 15
+      "contracts": 17
     },
     "10_syndicate.rho": {
       "bytes": 25227,
@@ -77,9 +77,9 @@
       "contracts": 20
     },
     "18_claim.rho": {
-      "bytes": 12152,
+      "bytes": 12711,
       "depth": 28,
-      "contracts": 14
+      "contracts": 15
     },
     "19_books.rho": {
       "bytes": 4333,

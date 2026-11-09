@@ -14,12 +14,14 @@ contracts and does not modify r-share.
 
 ## r-gen — https://github.com/rhovision-org/r-gen
 
-Local reference checkout: `/home/patrick/RGen`, commit `639d0f2`.
+Local reference checkout: `/home/patrick/RGen`, commit `c0ae67d`.
 
-Patterns referenced: `OracleFactory.open` and the private `applyDecision` execution protocol
-(`contracts/src/deploy/30_oracle.rho`); the claim/validation/K-Asset evidence model; the
-insurability tri-test in `legacy/lib/RiskMath.rho`; and the public `KAsset("get")` state shape
-under `kasset.conventions/v1`. The normative artifacts in r-gen `639d0f2` are
+Patterns referenced: `OracleFactory.openBound`, the one-shot subject snapshot and the private
+`applyDecision` execution protocol (`contracts/src/deploy/30_oracle.rho`); the
+claim/validation/K-Asset evidence model; the insurability tri-test in
+`legacy/lib/RiskMath.rho`; and the public `KAsset("get")` state shape under
+`kasset.conventions/v1`, including the optional `variance` snapshot declared by a value
+proposition. The normative artifacts in r-gen `c0ae67d` are
 `docs/src/reference/kasset-conventions.md`, `spec/schemas/kasset-conventions.json`,
 `spec/fixtures/kasset-conventions-v1.json` and `spec/vectors/kasset-conventions.tsv`. r-sure
 consumes the interface only; it validates the conventions itself and has no compile-time

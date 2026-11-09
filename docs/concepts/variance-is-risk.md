@@ -48,6 +48,9 @@ one to win; it makes the disagreement visible.
   - `verdict`: `valid` or `partial` (`invalid` is not insurable);
   - `status == "approved"` with a non-nil `approval.liability` (the share is validated and
     recorded, but not used in the engineering rate).
+  If the K-Asset carries a `variance` snapshot declared by its value proposition, that
+  declared rate is the engineering estimate; otherwise the rubric derivation below is the
+  fallback.
 - **Attestation.** The insured may submit a variance record bound to a `rgen:kasset`
   evidence entry `{kind, uri, hash}`. The attestation overrides the derivation and the source
   is recorded; it is an off-chain engineering claim, not a proof.
@@ -71,9 +74,32 @@ an explicit, reviewable number rather than a silent margin.
 If no engineering source is available, the risk is `insurer-only` and the flag is set, so the
 missing second opinion is visible too.
 
+## The declared rate
+
+A value proposition describes its asset as a quantity, a quality and a variance around the
+mean. The claim snapshots that variance and the K-Asset carries it:
+
+```json
+"variance": {"quantityBps": 400, "qualityBps": 1200, "n": 30}
+```
+
+`quantityBps` and `qualityBps` are the two dimensionless branch rates (`σ²/μ²` in bps); `n`
+is the sample size. The engineering estimate is their sum:
+
+```text
+engineeringBps = quantityBps + qualityBps      (each 0..10000, sum ≤ 10000)
+source         = "kasset-variance"
+```
+
+The adapter validates each branch and the sum, records `n`, and refuses a malformed
+snapshot with `"variance"`. The rate is used as declared rather than recomputed: the value
+proposition is the statement of expected variance, and the K-Asset's realized quality is
+still visible in `quality` for the fallback and for the approver.
+
 ## The derived rate
 
-The derivation maps the K-Asset conventions to a bounded rate:
+When there is no snapshot — an older K-Asset, or a claim without a value proposition — the
+derivation maps the K-Asset conventions to a bounded rate:
 
 ```text
 Q = completeness + correctness + traceability + fitness     (4..20)
@@ -107,7 +133,11 @@ the Risk, where the insured accepts them.
 
 ## Worked example
 
-An approved K-Asset has quality 3/3/3/3 (sum 12) and a valid verdict:
+A value proposition declares quantity 400 bps and quality 1200 bps; the K-Asset snapshot
+makes the engineering estimate `400 + 1200 = 1600`.
+
+Without a snapshot, an approved K-Asset with quality 3/3/3/3 (sum 12) and a valid verdict
+derives:
 
 ```text
 engineeringBps = (20-12)×500 + 0 = 4000
@@ -129,14 +159,17 @@ Proved in Lean over the shallow model (`RSure.Model.Variance`):
 
 - variance is invariant under shift and reflection, and scales by `c²`;
 - the derived rate is bounded under the rubric bounds and monotone in quality;
+- the declared rate is bounded by 10000 bps and the cross-repo fixture is exactly 1600;
 - the loaded premium never undercuts expected loss and is monotone in the rate;
 - the gap flag is exactly the tolerance comparison;
 - a soundness statement joins the load bound and the gap flag.
 
 Assumed, and recorded in `spec/lean/claims.yaml`:
 
-- **variance.estimator** — the quality mapping is an implied rate, not a statistical moment
-  from observed K-Asset values; `liability.shareBps` is deliberately excluded from it;
+- **variance.estimator** — the declared snapshot is trusted as the value proposition's
+  statement of variance, and the quality mapping is an implied rate for K-Assets without
+  one, not a statistical moment from observed values; `liability.shareBps` is deliberately
+  excluded from both;
 - **kasset.conventions** — r-gen passes quantity/quality/liability as conventions; r-sure
   validates them, and the K-Asset hash is a reference, not a recomputed digest;
 - **attestation trust** — r-sure records the source and binding but does not verify the

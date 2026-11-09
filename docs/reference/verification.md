@@ -14,7 +14,7 @@ make parse-check      # target node parser on built and rendered terms
 ```
 
 Recorded locally: 17 terms parse; 30 components; 19 state cells; acyclic; all terms within
-budget; 168 source arms registered; 285 Lean theorems, 48 vectors and 58 flow rules with
+budget; 168 source arms registered; 288 Lean theorems, 48 vectors and 58 flow rules with
 11 `proved-model` core arms. The claims register reports 26 covered, 1 partial and 1 tool
 entry, with 176 substantive theorems, 1 weak and no unaudited theorem. The Rust core, keystore, SDK,
 CLI and WASM crates compile; `cargo test --workspace` passes 13 tests (5 core, 3 keystore,
@@ -49,7 +49,7 @@ register IDs. `make audit-scan` runs the heuristic scanners for unclosed bundles
 take-await-take, reply shapes and pause scope.
 
 Current audit state: 30/30 component reviews, 46 interfaces, 40 hazards, 31 findings (28
-fixed, 3 accepted boundaries), 33 improvements, 42 registered suites and 285 registered
+fixed, 3 accepted boundaries), 33 improvements, 42 registered suites and 288 registered
 theorems. `check_bundle_closedness.py` reports zero candidates. The devnet install completes
 all 17 terms and the node proposes blocks; the install root-cause analysis is recorded under
 `audit/evidence/2026-11-05-install-rca`. F-003 (narrow, fail-closed pause), F-020 (payable
@@ -79,7 +79,7 @@ arms and 8/11 core-flow arms asserted. `make web-e2e` passes 3/3 journeys.
 The formal gate's current output:
 
 ```text
-lean: built, 285 axiom audits, 285 source theorems, no sorry/admit/axiom/native_decide
+lean: built, 288 axiom audits, 288 source theorems, no sorry/admit/axiom/native_decide
 vectors: 48 vectors current
 check-flows: 58 rules, 47 arms, 11 core arms proved-model, 0 proof-quality warnings
 claims: covered=26, partial=1, deferred=0, tool=1, substantive=176, weak=1, unaudited=0

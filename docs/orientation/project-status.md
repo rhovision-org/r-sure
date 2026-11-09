@@ -9,7 +9,7 @@
 | Area | Current state |
 |---|---|
 | Contracts | 17 deploy terms installed on devnet; 30 catalogue components and 19 state cells; static, parser, normalize and size gates pass. |
-| Formal model | 285 Lean theorems, 48 vectors, 58 flow rules and 11 `proved-model` core arms; 15 critical primitives covered. Claims register: 26 covered, 1 partial, 1 tool; 176 substantive theorems, 1 weak, 0 unaudited. |
+| Formal model | 288 Lean theorems, 48 vectors, 58 flow rules and 11 `proved-model` core arms; 15 critical primitives covered. Claims register: 26 covered, 1 partial, 1 tool; 176 substantive theorems, 1 weak, 0 unaudited. |
 | Audit | 25 findings (22 fixed, 3 accepted boundaries), 36 hazards, 25 improvements; 30/30 concurrency reviews and 46/46 composition interfaces. |
 | Tests | 42 registered suites; 37 passing, 3 `not_run` process gates and 2 implemented static gates. The campaign records 38 runs, 438 assertions and 0 assertion failures. |
 | Coverage | 128/151 public arms (84.8%), 141/168 all registered arms (83.9%), 8/11 core-flow arms; 23/28 fixed findings have a passing regression suite. |

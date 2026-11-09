@@ -36,7 +36,7 @@ and processed. Three caveats bound that claim:
 | P2/P3 findings | 9 (6 fixed, 3 accepted) |
 | Improvements | 33 |
 | Tests registered | 42 (37 passing, 3 `not_run`, 2 implemented) |
-| Lean theorems registered | 285 (register and source agree; no unregistered theorem) |
+| Lean theorems registered | 288 (register and source agree; no unregistered theorem) |
 | Claims | 26 covered, 1 partial, 1 tool; 15 critical primitives covered |
 
 ## P0

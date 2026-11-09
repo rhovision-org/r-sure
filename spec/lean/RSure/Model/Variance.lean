@@ -189,6 +189,28 @@ theorem variance_refuses_bad_input (isPartial : Bool) :
 theorem variance_reachable : qualityVarianceOption 20 false = some 0 := by
   simp [qualityVarianceOption, qualityVariance]
 
+/-- The declared rate from a value proposition snapshot: the quantity and quality
+    second moments in bps. r-gen bounds each branch and their sum to 10000 bps, so the
+    declared rate is always inside the same bound as the derived one. -/
+def declaredVariance (quantityBps qualityBps : Nat) : Option Nat :=
+  if quantityBps + qualityBps > 10000 then none
+  else some (quantityBps + qualityBps)
+
+theorem declaredVariance_le_10000 {q b v : Nat}
+    (h : declaredVariance q b = some v) : v ≤ 10000 := by
+  unfold declaredVariance at h
+  split at h
+  · simp at h
+  · simp at h
+    omega
+
+theorem declaredVariance_refuses_overflow : declaredVariance 6000 6000 = none := by
+  simp [declaredVariance]
+
+/-- The cross-repo golden fixture: quantity 4% and quality 12% declare 1600 bps. -/
+theorem declaredVariance_fixture : declaredVariance 400 1200 = some 1600 := by
+  simp [declaredVariance]
+
 theorem qualityVariance_mono {q1 q2 : Nat} (h : q1 ≤ q2) (h2 : q2 ≤ 20)
     (isPartial : Bool) :
     qualityVariance q2 isPartial ≤ qualityVariance q1 isPartial := by
