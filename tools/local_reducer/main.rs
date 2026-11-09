@@ -323,6 +323,50 @@ fn sum_amounts(reply: &str) -> i64 {
         .sum()
 }
 
+async fn check_curve_math(reducer: &mut Reducer, root: &str) -> Result<(), Error> {
+    let value_curve = r#"[0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500]"#;
+    let loss_curve = r#"[2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000]"#;
+    let stats = reducer
+        .component_call(
+            root,
+            "component:suremath",
+            "curveStats",
+            &format!(
+                ", {{\"kind\":\"quantiles\",\"unit\":\"bpsOfDeclaredValue\",\"n\":16,\"points\":{value_curve}}}"
+            ),
+        )
+        .await?;
+    if !stats.contains("\"varianceBps\"") || !stats.contains("\"ss\"") {
+        return Err(std::io::Error::other(format!("curveStats: {stats}")).into());
+    }
+    let delta = reducer
+        .component_call(
+            root,
+            "component:suremath",
+            "curveDelta",
+            &format!(
+                ", {{\"kind\":\"quantiles\",\"unit\":\"bpsOfDeclaredValue\",\"n\":16,\"points\":{loss_curve}}}, {{\"kind\":\"quantiles\",\"unit\":\"bpsOfDeclaredValue\",\"n\":16,\"points\":{value_curve}}}, 2000, 2000"
+            ),
+        )
+        .await?;
+    for needle in [
+        "\"relativeVarianceGapBps\" : 0",
+        "\"shapeL1Bps\" : 0",
+        "\"maxDevGapBps\" : 0",
+        "\"curveFlagged\" : false",
+        "\"rateGapBps\"",
+        "\"meanGapBps\"",
+    ] {
+        if !delta.contains(needle) {
+            return Err(
+                std::io::Error::other(format!("curveDelta missing {needle}: {delta}")).into(),
+            );
+        }
+    }
+    println!("local-reducer: curve stats and reflection delta -> {delta}");
+    Ok(())
+}
+
 async fn check_model_vectors(
     reducer: &mut Reducer,
     root: &str,
@@ -592,6 +636,7 @@ async fn run() -> Result<(), Error> {
 
     let vectors = check_model_vectors(&mut reducer, &root, &vectors_path()).await?;
     println!("local-reducer: {vectors} model vectors match SureMath");
+    check_curve_math(&mut reducer, &root).await?;
 
     let address = reducer
         .deploy(
@@ -1043,6 +1088,49 @@ async fn run() -> Result<(), Error> {
     }
     println!("local-reducer: declared variance -> {declared}");
 
+    // The value proposition may carry the whole distribution curve; the adapter
+    // validates it and uses its variance numerator as the engineering rate.
+    let curve_stub = r#"new rs(`rho:registry:insertArbitrary`), uriCh,
+    deployId(`rho:rchain:deployId`), KAsset in {
+  contract KAsset(@"get", ret) = {
+    ret!((true, {
+      "id": "rho:id:local-kasset-curve",
+      "quantity": {"unit": "m3", "value": 100},
+      "quality": {"completeness": 3, "correctness": 3,
+                  "traceability": 3, "fitness": 3},
+      "variance": {
+        "quantityBps": 400, "qualityBps": 1200, "n": 30,
+        "curve": {
+          "kind": "quantiles", "unit": "bpsOfDeclaredValue", "n": 16,
+          "points": [0, 500, 1000, 1500, 2000, 2500, 3000, 3500,
+                     4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500]
+        }
+      },
+      "verdict": "valid",
+      "status": "approved",
+      "approval": {"decision": "approve",
+                   "liability": {"responsible": "approver", "shareBps": 10000}}
+    }))
+  } |
+  rs!(bundle+{*KAsset}, *uriCh) |
+  for (@u <- uriCh) { deployId!([u]) }
+}"#;
+    let curve_reply = reducer.deploy(curve_stub).await?.join(" ");
+    let curve_uri = find_uri(&curve_reply)
+        .ok_or_else(|| std::io::Error::other(format!("curve stub: {curve_reply}")))?;
+    let curve_read = reducer
+        .component_call(
+            &root,
+            "component:rgen",
+            "variance",
+            &format!(r#", "{curve_uri}""#),
+        )
+        .await?;
+    if !curve_read.contains("kasset-curve") || !curve_read.contains("\"curveStats\"") {
+        return Err(std::io::Error::other(format!("curve variance: {curve_read}")).into());
+    }
+    println!("local-reducer: curve variance -> {curve_read}");
+
     let risk_req = format!(
         r#", *dId, {{"class": "property", "assetRef": {{"kind": "site", "hash": "asset:local", "uri": "{kasset_uri}"}}, "evidence": [{{"kind": "rgen:kasset", "uri": "{kasset_uri}", "hash": "kasset:local"}}], "triTest": {{"exposureRef": "exposure:local", "probabilityBasis": "claims-history", "consequenceBasis": "declared-value", "consequenceRef": "consequence:local"}}, "periodStart": 0, "periodEnd": 1000000, "declaredValue": 5000, "requestedLimit": 1000, "requestedDeductible": 0}}"#
     );
@@ -1079,6 +1167,100 @@ async fn run() -> Result<(), Error> {
     }
     println!("local-reducer: variance acknowledged on accept");
 
+    let signal = reducer
+        .component_call(
+            &root,
+            "component:variance-signal-book",
+            "register",
+            &format!(r#", "{risk_uri}""#),
+        )
+        .await?;
+    if !signal.contains("true") || !signal.contains("rsk:") {
+        return Err(std::io::Error::other(format!("signal register: {signal}")).into());
+    }
+    println!("local-reducer: variance signal -> {signal}");
+    let summary = reducer
+        .component_call(&root, "component:variance-signal-book", "summary", "")
+        .await?;
+    if !summary.contains("\"count\" : 1") || !summary.contains("\"positive\" : 1") {
+        return Err(std::io::Error::other(format!("signal summary: {summary}")).into());
+    }
+    println!("local-reducer: variance signal summary -> {summary}");
+    let duplicate = reducer
+        .component_call(
+            &root,
+            "component:variance-signal-book",
+            "register",
+            &format!(r#", "{risk_uri}""#),
+        )
+        .await?;
+    if !duplicate.contains("duplicate") {
+        return Err(std::io::Error::other(format!("signal duplicate: {duplicate}")).into());
+    }
+    println!("local-reducer: refused duplicate variance signal");
+
+    let curve_risk_req = format!(
+        r#", *dId, {{"class": "property", "assetRef": {{"kind": "site", "hash": "asset:curve", "uri": "{curve_uri}"}}, "evidence": [{{"kind": "rgen:kasset", "uri": "{curve_uri}", "hash": "kasset:curve"}}], "triTest": {{"exposureRef": "exposure:curve", "probabilityBasis": "claims-history", "consequenceBasis": "declared-value", "consequenceRef": "consequence:curve"}}, "periodStart": 0, "periodEnd": 1000000, "declaredValue": 5000, "requestedLimit": 1000, "requestedDeductible": 0}}"#
+    );
+    let curve_risk_reply = reducer
+        .component_call(&root, "component:risk-book", "submit", &curve_risk_req)
+        .await?;
+    let curve_risk_uri = find_uri(&curve_risk_reply)
+        .ok_or_else(|| std::io::Error::other(format!("curve risk submit: {curve_risk_reply}")))?;
+    println!("local-reducer: curve risk {curve_risk_uri}");
+
+    let curve_assessed = reducer
+        .uri_call(
+            &curve_risk_uri,
+            "assess",
+            r#", *dId, {"expectedLoss": 800, "quotedPremium": 1200, "loadBps": 2000, "basisHash": "underwriting:curve", "toleranceBps": 1000, "shapeToleranceBps": 1000, "lossCurve": {"kind": "quantiles", "unit": "bpsOfDeclaredValue", "n": 16, "points": [2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000]}}"#,
+        )
+        .await?;
+    if !curve_assessed.contains("true") {
+        return Err(std::io::Error::other(format!("assess curve risk: {curve_assessed}")).into());
+    }
+    let curve_variance = reducer.uri_call(&curve_risk_uri, "variance", "").await?;
+    for needle in [
+        "\"curveSource\" : \"curve-curve\"",
+        "\"curveFlagged\" : false",
+        "\"relativeVarianceGapBps\" : 0",
+        "\"rateFlagged\" : true",
+        "\"pricingBps\" : 1360",
+    ] {
+        if !curve_variance.contains(needle) {
+            return Err(std::io::Error::other(format!(
+                "curve variance missing {needle}: {curve_variance}"
+            ))
+            .into());
+        }
+    }
+    println!("local-reducer: curve risk variance -> {curve_variance}");
+    let curve_accepted = reducer.uri_call(&curve_risk_uri, "accept", ", *dId").await?;
+    if !curve_accepted.contains("true") {
+        return Err(std::io::Error::other(format!("accept curve risk: {curve_accepted}")).into());
+    }
+    let curve_signal = reducer
+        .component_call(
+            &root,
+            "component:variance-signal-book",
+            "register",
+            &format!(r#", "{curve_risk_uri}""#),
+        )
+        .await?;
+    if !curve_signal.contains("true") {
+        return Err(std::io::Error::other(format!("curve signal: {curve_signal}")).into());
+    }
+    let curve_summary = reducer
+        .component_call(&root, "component:variance-signal-book", "summary", "")
+        .await?;
+    if !curve_summary.contains("\"count\" : 2")
+        || !curve_summary.contains("\"negative\" : 1")
+        || !curve_summary.contains("\"curveFlagged\" : 0")
+    {
+        return Err(std::io::Error::other(format!("curve summary: {curve_summary}")).into());
+    }
+    println!("local-reducer: curve signal summary -> {curve_summary}");
+
     let bad_assess = reducer
         .component_call(&root, "component:risk-book", "submit", &risk_req)
         .await?;
@@ -1102,9 +1284,9 @@ async fn run() -> Result<(), Error> {
     expect_refusal("premium below floor", &low_premium, "premium floor")?;
     let keys = reducer.deploy(&keys).await?.join(" ");
     let registered = keys.matches("component:").count();
-    if !keys.contains("true") || registered != 21 {
+    if !keys.contains("true") || registered != 22 {
         return Err(std::io::Error::other(format!(
-            "root keys: expected 21 components, got {registered}: {keys}"
+            "root keys: expected 22 components, got {registered}: {keys}"
         ))
         .into());
     }

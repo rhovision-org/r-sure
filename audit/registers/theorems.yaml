@@ -3550,3 +3550,142 @@ theorems:
   evidence: spec/lean/RSure/Model/Variance.lean
   reviewer: internal
   audit_line: true
+- id: TH-289
+  name: l1Minus_nonneg
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '∀ xs ys, 0 ≤ l1Minus xs ys'
+  axioms:
+  - propext
+  - Quot.sound
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-290
+  name: l1Plus_nonneg
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '∀ xs ys, 0 ≤ l1Plus xs ys'
+  axioms:
+  - propext
+  - Quot.sound
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-291
+  name: maxDev_nonneg
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '∀ xs, 0 ≤ maxDev xs'
+  axioms:
+  - propext
+  - Quot.sound
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-292
+  name: ssNum_reflect_curve
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '(xs : List Int) : ssNum (reflect xs) = ssNum xs'
+  axioms:
+  - propext
+  - Quot.sound
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-293
+  name: relativeVarianceGap_reflect
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '(a : List Int) : relativeVarianceGap a (reflect a) = 0'
+  axioms:
+  - propext
+  - Quot.sound
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-294
+  name: ssNum_shift_curve
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '(a : List Int) (c : Int) : ssNum (a.map (fun p => p + c)) = ssNum a'
+  axioms:
+  - propext
+  - Quot.sound
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-295
+  name: relativeVarianceGap_shift
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '(a : List Int) (c : Int) : relativeVarianceGap a (a.map (fun p => p + c)) = 0'
+  axioms:
+  - propext
+  - Quot.sound
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-296
+  name: signalPut_same
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '(n : Nat) : signalPut n n = .duplicate'
+  axioms:
+  - propext
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-297
+  name: signalPut_stale
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '{old new : Nat} (h : new < old) : signalPut old new = .stale'
+  axioms:
+  - propext
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-298
+  name: signalPut_replace
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '{old new : Nat} (h : old < new) : signalPut old new = .replace'
+  axioms:
+  - propext
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true
+- id: TH-299
+  name: absInt_nonneg
+  module: RSure.Model.Curve
+  kind: theorem
+  status: proved-model
+  statement: '(x : Int) : 0 ≤ absInt x'
+  axioms:
+  - propext
+  scope: shallow Lean component model; not a Rholang refinement
+  evidence: spec/lean/RSure/Model/Curve.lean
+  reviewer: internal
+  audit_line: true

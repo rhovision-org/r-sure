@@ -27,14 +27,14 @@
       "contracts": 8
     },
     "04_math.rho": {
-      "bytes": 6527,
-      "depth": 16,
-      "contracts": 7
+      "bytes": 13427,
+      "depth": 18,
+      "contracts": 22
     },
     "05_rgen.rho": {
-      "bytes": 10262,
+      "bytes": 12079,
       "depth": 19,
-      "contracts": 17
+      "contracts": 21
     },
     "10_syndicate.rho": {
       "bytes": 25227,
@@ -47,9 +47,9 @@
       "contracts": 7
     },
     "12_risk.rho": {
-      "bytes": 14086,
+      "bytes": 19817,
       "depth": 29,
-      "contracts": 17
+      "contracts": 25
     },
     "13_slip.rho": {
       "bytes": 21552,
@@ -82,9 +82,9 @@
       "contracts": 15
     },
     "19_books.rho": {
-      "bytes": 4333,
-      "depth": 17,
-      "contracts": 4
+      "bytes": 13038,
+      "depth": 21,
+      "contracts": 19
     },
     "40_payments.rho": {
       "bytes": 5645,

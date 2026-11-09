@@ -1,6 +1,7 @@
 import RSure.Basic
 import RSure.Model.Math
 import RSure.Model.Variance
+import RSure.Model.Curve
 import RSure.Model.Terms
 import RSure.Model.Root
 import RSure.Model.Admin
@@ -309,3 +310,14 @@ import RSure.Linear.Protocol
 #print axioms RSure.Model.Variance.declaredVariance_le_10000
 #print axioms RSure.Model.Variance.declaredVariance_refuses_overflow
 #print axioms RSure.Model.Variance.declaredVariance_fixture
+#print axioms RSure.Model.Curve.absInt_nonneg
+#print axioms RSure.Model.Curve.l1Minus_nonneg
+#print axioms RSure.Model.Curve.l1Plus_nonneg
+#print axioms RSure.Model.Curve.maxDev_nonneg
+#print axioms RSure.Model.Curve.ssNum_reflect_curve
+#print axioms RSure.Model.Curve.relativeVarianceGap_reflect
+#print axioms RSure.Model.Curve.ssNum_shift_curve
+#print axioms RSure.Model.Curve.relativeVarianceGap_shift
+#print axioms RSure.Model.Curve.signalPut_same
+#print axioms RSure.Model.Curve.signalPut_stale
+#print axioms RSure.Model.Curve.signalPut_replace

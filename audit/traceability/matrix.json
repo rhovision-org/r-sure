@@ -1,13 +1,13 @@
 {
   "schema": "rshare.traceability/v1",
   "summary": {
-    "arms": 169,
+    "arms": 179,
     "arms_with_flow_rule": 11,
     "arms_with_hazard": 27,
     "hazards": 40,
     "findings": 31,
     "improvements": 33,
-    "tests": 42
+    "tests": 44
   },
   "arms": [
     {
@@ -2271,6 +2271,110 @@
       "tests": []
     },
     {
+      "component": "VarianceSignalBook",
+      "arm": "register",
+      "source": "contracts/src/deploy/19_books.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "VarianceSignalBook",
+      "arm": "signal",
+      "source": "contracts/src/deploy/19_books.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "VarianceSignalBook",
+      "arm": "signals",
+      "source": "contracts/src/deploy/19_books.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "VarianceSignalBook",
+      "arm": "byAsset",
+      "source": "contracts/src/deploy/19_books.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "VarianceSignalBook",
+      "arm": "byClass",
+      "source": "contracts/src/deploy/19_books.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "VarianceSignalBook",
+      "arm": "bySource",
+      "source": "contracts/src/deploy/19_books.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "VarianceSignalBook",
+      "arm": "bySign",
+      "source": "contracts/src/deploy/19_books.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "VarianceSignalBook",
+      "arm": "summary",
+      "source": "contracts/src/deploy/19_books.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
       "component": "Payments",
       "arm": "health",
       "source": "contracts/src/deploy/40_payments.rho",
@@ -2415,6 +2519,32 @@
     {
       "component": "SureMath",
       "arm": "varianceStats",
+      "source": "contracts/src/deploy/04_math.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "SureMath",
+      "arm": "curveStats",
+      "source": "contracts/src/deploy/04_math.rho",
+      "visibility": "public",
+      "flow_rule": null,
+      "flow_status": null,
+      "lean_target": null,
+      "hazards": [],
+      "findings": [],
+      "improvements": [],
+      "tests": []
+    },
+    {
+      "component": "SureMath",
+      "arm": "curveDelta",
       "source": "contracts/src/deploy/04_math.rho",
       "visibility": "public",
       "flow_rule": null,

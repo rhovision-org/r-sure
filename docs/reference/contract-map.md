@@ -20,23 +20,24 @@
 | `16_fund.rho` | SureFund | `fundState` |
 | `17_policy.rho` | PolicyFactory, Policy | `policyState` |
 | `18_claim.rho` | ClaimFactory, Claim | `claimState` |
-| `19_books.rho` | PolicyBook, ClaimBook | `policyBookState`, `claimBookState` |
+| `19_books.rho` | PolicyBook, ClaimBook, VarianceSignalBook | `policyBookState`, `claimBookState`, `varianceSignalBookState` |
 
 ## Dependencies
 
 ```
 SureRoot -> Clock/Verifier/Codec/AdminGuard/SureAdmin/CoverTerms/SureMath/Payments
 Payments -> r-cash Root
-RgenAdapter -> optional r-gen Root, SureMath (varianceRate), KAsset (read-only get)
+RgenAdapter -> optional r-gen Root, SureMath (varianceRate/curveStats), KAsset (read-only get)
 SyndicateBook -> Payments -> Syndicate -> LineGrant
 BrokerBook -> Broker
-RiskBook -> Risk -> SureMath (varianceGap/loadedPremium), RgenAdapter (variance), Clock
+RiskBook -> Risk -> SureMath (varianceGap/loadedPremium/curveStats/curveDelta), RgenAdapter (variance), Clock
 SlipFactory -> BrokerBook/CoverTerms/Payments -> Slip -> Syndicate/Risk
 LineFactory -> Line -> Syndicate capabilities
 DistributionFactory -> Distribution -> Payments/SureFund/Line
 PolicyFactory -> Policy -> SureMath/SureFund/Line/ClaimFactory
 ClaimFactory -> Claim -> Policy/RgenAdapter
 PolicyBook/ClaimBook -> Policy/Claim
+VarianceSignalBook -> Risk/Clock
 ```
 
 The graph is acyclic in `contracts/components.json`. Runtime resolution is per arm, so a

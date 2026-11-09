@@ -4,12 +4,12 @@
 
 | Metric | Covered |
 |---|---|
-| Passed suites | 37/42 |
-| Public arms asserted by passing suites | 128/152 (84.2%) |
-| All registered arms asserted | 141/169 (83.4%) |
+| Passed suites | 37/44 |
+| Public arms asserted by passing suites | 128/162 (79.0%) |
+| All registered arms asserted | 141/179 (78.8%) |
 | Core flow arms asserted | 8/11 (72.7%) |
 | Fixed findings with a passing regression suite asserting a linked arm | 23/28 |
-| Invariants tracked | 13/13 |
+| Invariants tracked | 14/14 |
 
 A suite contributes only when it is `pass`, has at least one assertion and
 emits `covered_arms` in its `RSURE_RESULT` trailer. Stubs and zero-assertion

@@ -76,6 +76,13 @@ Insurance terms first, then r-sure terms.
 - **Payable**: `max(0, min(agreed, perClaimLimit, aggregateRemaining) - deductible)`.
 - **Policy**: a bound slip with lines, premium and aggregate accounting.
 - **Risk**: the insured's submission with asset, evidence and insurability answers.
+- **Risk curve**: a `risk-curve/v1` 16-point distribution in bps of the declared value;
+  the K-Asset value curve and the actuarial `lossCurve` are the same object under full
+  indemnity.
+- **Curve delta**: the signed relative variance gap plus the reflection-invariant shape and
+  tail metrics between two risk curves; the market signal, not a consensus.
+- **VarianceSignalBook**: the published index of assessed risk deltas, versioned by the Risk
+  nonce and summarised by count, sign, flags and gap sums.
 - **Second**: the following syndicate that shares complex-claim agreement.
 - **Slip**: the placing document; subscriptions sum to 10000 bps.
 - **Syndicate**: capacity provider with a contract-owned claims purse.

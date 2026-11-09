@@ -66,6 +66,18 @@ assumptions:
     note: >-
       r-sure checks evidence presence, not probability or cost quality. Loss
       quality is an off-chain underwriting duty.
+  curve.conventions:
+    status: assumed
+    note: >-
+      The 16-point risk curve is a declared value-proposition convention. r-sure validates
+      length, order, bounds and a positive sum; it does not derive the curve from observed
+      values.
+  curve.signal:
+    status: assumed
+    note: >-
+      VarianceSignalBook publishes the signed gap and the reflection-invariant shape/tail
+      deltas between the value curve and the loss curve. It is a market signal, not a
+      pricing rule or a consensus.
 
 invariants:
   INV-1:
@@ -212,6 +224,28 @@ invariants:
       - {name: RSure.Model.Variance.qualityVariance_le, strength: substantive, kind: bound}
       - {name: RSure.Model.Variance.loadedPremium_ge_expected, strength: substantive, kind: bound}
       - {name: RSure.Model.Variance.gapFlag_sound, strength: substantive, kind: binding}
+
+  INV-14:
+    statement: >-
+      The value curve and the loss curve are compared by the variance numerator, not the
+      rate. A full-indemnity reflection or a common shift leaves the relative gap at zero;
+      the curve L1 components and maximum deviation are non-negative; VarianceSignalBook
+      versions a signal by the Risk nonce.
+    predicate: RSure.Model.Curve.relativeVarianceGap
+    status: covered
+    note: >-
+      Model-only: the curve is a declared convention; r-sure validates shape, order and
+      bounds but does not derive it from observed values. The signal is published, not
+      priced, and is not yet joined to a critical-path claim.
+    theorems:
+      - {name: RSure.Model.Curve.relativeVarianceGap_reflect, strength: substantive, kind: preservation}
+      - {name: RSure.Model.Curve.relativeVarianceGap_shift, strength: substantive, kind: preservation}
+      - {name: RSure.Model.Curve.l1Minus_nonneg, strength: substantive, kind: bound}
+      - {name: RSure.Model.Curve.l1Plus_nonneg, strength: substantive, kind: bound}
+      - {name: RSure.Model.Curve.maxDev_nonneg, strength: substantive, kind: bound}
+      - {name: RSure.Model.Curve.signalPut_same, strength: substantive, kind: rejection}
+      - {name: RSure.Model.Curve.signalPut_stale, strength: substantive, kind: rejection}
+      - {name: RSure.Model.Curve.signalPut_replace, strength: substantive, kind: preservation}
 
   INV-12:
     statement: global pause blocks new risk without blocking settlement, close, expiry or refunds.

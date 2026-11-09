@@ -9,7 +9,10 @@ new
   deployId(`rho:rchain:deployId`),
   rootCh, c, ack,
   sharesSum, planBuild,
-  mathVerdictPenalty, mathValuesSum, mathValuesOk, mathSsSum
+  mathVerdictPenalty, mathValuesSum, mathValuesOk, mathSsSum,
+  curveOk, curveOrdered, curveSum, curveAbs, curveFlag,
+  curveL1, curveMirrorL1, curveMaxDev, curveMaxPointGap, curveMaxMirrorGap,
+  curveBuildStats, curveDeltaBuild, curveMin, curveDen, curveRelVar
 in {
   contract sharesSum(@items, @i, @acc, ret) = {
     if (i >= items.length()) { ret!(acc) }
@@ -307,6 +310,314 @@ in {
                   mathSsSum!(values, 0, w, s, 0, *ssCh) |
                   for (@ss <- ssCh) {
                     ret!((true, (ss * 10000) / (w * s * s), ss))
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract curveAbs(@x, ret) = {
+    if (x < 0) { ret!(0 - x) } else { ret!(x) }
+  } |
+
+  contract curveFlag(@x, @tolerance, ret) = {
+    if (x < 0) { ret!((0 - x) > tolerance) }
+    else { ret!(x > tolerance) }
+  } |
+
+  contract curveMin(@a, @b, ret) = {
+    if (a < b) { ret!(a) } else { ret!(b) }
+  } |
+
+  contract curveDen(@a, @b, ret) = {
+    if (a > b) { ret!(a) } else { ret!(b) }
+  } |
+
+  contract curveOrdered(@points, @i, ret) = {
+    if (i + 1 >= points.length()) { ret!(true) }
+    else {
+      match (points.nth(i), points.nth(i + 1)) {
+        (a, b) => {
+          if (a < 0 || a > 10000 || b < 0 || b > 10000 || a > b) {
+            ret!(false)
+          } else { curveOrdered!(points, i + 1, *ret) }
+        }
+      }
+    }
+  } |
+
+  contract curveSum(@points, @i, @acc, ret) = {
+    if (i >= points.length()) { ret!(acc) }
+    else {
+      match points.nth(i) {
+        p => { curveSum!(points, i + 1, acc + p, *ret) }
+      }
+    }
+  } |
+
+  contract curveOk(@curve, ret) = {
+    match (curve.get("kind"), curve.get("unit"), curve.get("n"), curve.get("points")) {
+      ("quantiles", "bpsOfDeclaredValue", 16, points) => {
+        if (points.length() != 16) { ret!((false, "curve")) }
+        else {
+          new oCh, sCh in {
+            curveOrdered!(points, 0, *oCh) |
+            curveSum!(points, 0, 0, *sCh) |
+            for (@ok <- oCh; @sum <- sCh) {
+              if (ok == false) { ret!((false, "curve order")) }
+              else {
+                if (sum < 1) { ret!((false, "curve")) }
+                else { ret!((true, points, sum)) }
+              }
+            }
+          }
+        }
+      }
+      _ => { ret!((false, "curve")) }
+    }
+  } |
+
+  contract curveL1(@a, @b, @i, @w, @sa, @sb, @acc, ret) = {
+    if (i >= w) { ret!(acc) }
+    else {
+      match (a.nth(i), b.nth(i)) {
+        (ai, bi) => {
+          new dCh in {
+            curveAbs!((w * ai - sa) - (w * bi - sb), *dCh) |
+            for (@d <- dCh) {
+              curveL1!(a, b, i + 1, w, sa, sb, acc + d, *ret)
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract curveMirrorL1(@a, @b, @i, @w, @sa, @sb, @acc, ret) = {
+    if (i >= w) { ret!(acc) }
+    else {
+      match (a.nth(i), b.nth(w - 1 - i)) {
+        (ai, bi) => {
+          new dCh in {
+            curveAbs!((w * ai - sa) + (w * bi - sb), *dCh) |
+            for (@d <- dCh) {
+              curveMirrorL1!(a, b, i + 1, w, sa, sb, acc + d, *ret)
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract curveMaxDev(@points, @i, @w, @s, @acc, ret) = {
+    if (i >= w) { ret!(acc) }
+    else {
+      match points.nth(i) {
+        p => {
+          new dCh in {
+            curveAbs!(w * p - s, *dCh) |
+            for (@d <- dCh) {
+              if (d > acc) { curveMaxDev!(points, i + 1, w, s, d, *ret) }
+              else { curveMaxDev!(points, i + 1, w, s, acc, *ret) }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract curveMaxPointGap(@a, @b, @i, @w, @sa, @sb, @acc, ret) = {
+    if (i >= w) { ret!(acc) }
+    else {
+      match (a.nth(i), b.nth(i)) {
+        (ai, bi) => {
+          new dCh in {
+            curveAbs!((w * ai - sa) - (w * bi - sb), *dCh) |
+            for (@d <- dCh) {
+              if (d > acc) { curveMaxPointGap!(a, b, i + 1, w, sa, sb, d, *ret) }
+              else { curveMaxPointGap!(a, b, i + 1, w, sa, sb, acc, *ret) }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract curveMaxMirrorGap(@a, @b, @i, @w, @sa, @sb, @acc, ret) = {
+    if (i >= w) { ret!(acc) }
+    else {
+      match (a.nth(i), b.nth(w - 1 - i)) {
+        (ai, bi) => {
+          new dCh in {
+            curveAbs!((w * ai - sa) + (w * bi - sb), *dCh) |
+            for (@d <- dCh) {
+              if (d > acc) { curveMaxMirrorGap!(a, b, i + 1, w, sa, sb, d, *ret) }
+              else { curveMaxMirrorGap!(a, b, i + 1, w, sa, sb, acc, *ret) }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract curveBuildStats(@points, @sum, @unit, ret) = {
+    new ssCh, devCh in {
+      mathSsSum!(points, 0, 16, sum, 0, *ssCh) |
+      curveMaxDev!(points, 0, 16, sum, 0, *devCh) |
+      for (@ss <- ssCh; @maxDev <- devCh) {
+        match (points.nth(0), points.nth(15)) {
+          (min, max) => {
+            match sum / 16 {
+              mean => {
+                match (ss * 10000) / (16 * sum * sum) {
+                  varianceBps => {
+                    ret!((true, {
+                      "n": 16,
+                      "unit": unit,
+                      "sum": sum,
+                      "ss": ss,
+                      "meanBps": mean,
+                      "varianceBps": varianceBps,
+                      "minBps": min,
+                      "maxBps": max,
+                      "upperTailBps": max,
+                      "lowerTailBps": min,
+                      "maxDevNum": maxDev
+                    }))
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract curveRelVar(@ass, @bss, ret) = {
+    if (ass == 0) {
+      if (bss == 0) { ret!((0, true)) }
+      else { ret!((10000, true)) }
+    } else {
+      ret!(((bss - ass) * 10000 / ass, false))
+    }
+  } |
+
+  contract curveDeltaBuild(@as, @bs, @aStats, @bStats, @fL1, @mL1, @fMax, @mMax,
+                           @toleranceBps, @shapeToleranceBps, ret) = {
+    new denCh, relCh, shapeCh, maxCh in {
+      curveDen!(as, bs, *denCh) |
+      curveRelVar!(aStats.get("ss"), bStats.get("ss"), *relCh) |
+      curveMin!(fL1, mL1, *shapeCh) |
+      curveMin!(fMax, mMax, *maxCh) |
+      for (@den <- denCh; @relPair <- relCh; @shapeNum <- shapeCh; @maxNum <- maxCh) {
+        match relPair {
+          (rel, denomZero) => {
+            match (shapeNum * 10000 / den, maxNum * 10000 / den) {
+              (shapeL1Bps, maxPointGapBps) => {
+                match (bStats.get("maxDevNum") - aStats.get("maxDevNum")) {
+                  devNum => {
+                    match devNum * 10000 / den {
+                      maxDevGapBps => {
+                        new rfCh, vfCh, sfCh, tfCh in {
+                          curveFlag!(bStats.get("varianceBps") - aStats.get("varianceBps"),
+                                     toleranceBps, *rfCh) |
+                          curveFlag!(rel, toleranceBps, *vfCh) |
+                          curveFlag!(shapeL1Bps, shapeToleranceBps, *sfCh) |
+                          curveFlag!(maxDevGapBps, shapeToleranceBps, *tfCh) |
+                          for (@rf <- rfCh; @vf <- vfCh; @sf <- sfCh; @tf <- tfCh) {
+                            ret!((true, {
+                              "n": 16,
+                              "unit": aStats.get("unit"),
+                              "engineering": aStats,
+                              "insurer": bStats,
+                              "relativeVarianceGapBps": rel,
+                              "rateGapBps": bStats.get("varianceBps") - aStats.get("varianceBps"),
+                              "meanGapBps": (bs - as) * 10000 / den,
+                              "shapeL1Bps": shapeL1Bps,
+                              "maxPointGapBps": maxPointGapBps,
+                              "maxDevGapBps": maxDevGapBps,
+                              "rateFlagged": rf,
+                              "varianceFlagged": vf,
+                              "shapeFlagged": sf,
+                              "tailFlagged": tf,
+                              "curveFlagged": vf || sf || tf,
+                              "denominatorZero": denomZero,
+                              "toleranceBps": toleranceBps,
+                              "shapeToleranceBps": shapeToleranceBps
+                            }))
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } |
+
+  contract SureMath(@"curveStats", @curve, ret) = {
+    new okCh in {
+      curveOk!(curve, *okCh) |
+      for (@ok <- okCh) {
+        match ok {
+          (true, points, sum) => {
+            curveBuildStats!(points, sum, curve.get("unit"), *ret)
+          }
+          (false, reason) => { ret!((false, reason)) }
+        }
+      }
+    }
+  } |
+
+  contract SureMath(@"curveDelta", @a, @b, @toleranceBps, @shapeToleranceBps, ret) = {
+    if (toleranceBps < 0 || toleranceBps > 10000
+        || shapeToleranceBps < 0 || shapeToleranceBps > 10000) {
+      ret!((false, "tolerance"))
+    } else {
+      if (a.get("unit") != b.get("unit")) {
+        ret!((false, "curve unit"))
+      } else {
+        new aCh in {
+          curveOk!(a, *aCh) |
+          for (@ao <- aCh) {
+            match ao {
+              (false, reason) => { ret!((false, reason)) }
+              (true, ap, as) => {
+                new bCh in {
+                  curveOk!(b, *bCh) |
+                  for (@bo <- bCh) {
+                    match bo {
+                      (false, reason) => { ret!((false, reason)) }
+                      (true, bp, bs) => {
+                        new aStCh, bStCh, fCh, mCh, fMaxCh, mMaxCh in {
+                          curveBuildStats!(ap, as, a.get("unit"), *aStCh) |
+                          curveBuildStats!(bp, bs, b.get("unit"), *bStCh) |
+                          curveL1!(ap, bp, 0, 16, as, bs, 0, *fCh) |
+                          curveMirrorL1!(ap, bp, 0, 16, as, bs, 0, *mCh) |
+                          curveMaxPointGap!(ap, bp, 0, 16, as, bs, 0, *fMaxCh) |
+                          curveMaxMirrorGap!(ap, bp, 0, 16, as, bs, 0, *mMaxCh) |
+                          for (@aStats <- aStCh; @bStats <- bStCh;
+                               @fL1 <- fCh; @mL1 <- mCh; @fMax <- fMaxCh; @mMax <- mMaxCh) {
+                            match (aStats, bStats) {
+                              ((true, ast), (true, bst)) => {
+                                curveDeltaBuild!(as, bs, ast, bst, fL1, mL1, fMax, mMax,
+                                                 toleranceBps, shapeToleranceBps, *ret)
+                              }
+                              _ => { ret!((false, "curve")) }
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }

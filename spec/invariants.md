@@ -18,6 +18,7 @@ The Lean names are in `spec/lean/claims.yaml` and `spec/lean/RSure/Invariants.le
 | INV-11 | Atomicity | No partial value move survives a failed deploy. |
 | INV-12 | Pause | Settlement, close, expiry and refunds are not blocked by global pause. |
 | INV-13 | Variance is risk | A K-Asset's value variance is the insurance risk: the rate is `Var/mean^2` in bps, the engineering and insurer estimates and their signed gap are recorded, and acceptance acknowledges the gap. |
+| INV-14 | Curve delta is a signal | The value curve and the loss curve are compared by the variance numerator, not the rate; a reflection or common shift leaves the relative gap at zero, and `VarianceSignalBook` versions a signal by the Risk nonce. |
 
 ## Model scope
 
@@ -27,4 +28,7 @@ the contract's `paid == amount` guard succeeds, and line exits are guarded by
 `SureMath@"payable"`. INV-10 is guarded in `agree`, `addEvidence`, `classify`, `assess`,
 `dispute` and `applyDecision` after F-021. INV-11 remains a boundary: native ERTP moves and
 node rollback are assumed. INV-12 is a narrow, fail-closed pause checked by
-`tools/check_pause_scope.py`; it is not a Lean theorem.
+`tools/check_pause_scope.py`; it is not a Lean theorem. INV-14 is model-only: the curve
+shape and tail metrics are validated structurally by the contracts and proved only in the
+shallow `RSure.Model.Curve` model; the signal book's Rholang wiring is covered by the local
+reducer, not by a refinement proof.

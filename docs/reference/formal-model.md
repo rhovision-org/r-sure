@@ -6,8 +6,8 @@
 
 ## What is proved
 
-The Lean project at `spec/lean` contains 288 kernel-checked theorems over the insurance
-economics. They answer five questions:
+The Lean project at `spec/lean` contains 299 kernel-checked theorems over the insurance
+economics. They answer six questions:
 
 1. **Can the promise be backed?** Capacity, quote reservation, open-line and loss payment
    preserve `committed + written <= capital` (`INV-1`, `INV-7`).
@@ -23,6 +23,9 @@ economics. They answer five questions:
    (`INV-13`); the variance rate is scale-free and bounded under the K-Asset rubric; the
    engineering and insurer estimates and their signed gap are recorded; and the loaded
    premium never undercuts expected loss.
+6. **Is the curve delta a real signal?** A reflection and a common shift leave the relative
+   variance numerator gap at zero (`INV-14`); the curve L1 components and maximum deviation
+   are non-negative; and the signal book's nonce transition is duplicate, stale or replace.
 
 The register in `spec/lean/claims.yaml` is the authoritative claim list. `docs/reference/proof-map.md`
 is the rendered view.
@@ -56,6 +59,8 @@ The assumptions are recorded in `claims.yaml` and repeated here:
 | `evidence.quality` | out of scope | evidence presence is checked, not loss quality |
 | `variance.estimator` | assumed | the quality map is an implied variance-rate estimator, not a measured moment |
 | `kasset.conventions` | assumed | r-gen passes quantity/quality/liability as conventions; r-sure validates them |
+| `curve.conventions` | assumed | the 16-point risk curve is a declared convention; r-sure validates shape, not the statistical derivation |
+| `curve.signal` | assumed | the signal book publishes the gap; it does not price or force a consensus |
 
 ## Module tree
 
@@ -78,6 +83,7 @@ spec/lean/
   RSure/Model/Policy.lean        premium distribution and settlement
   RSure/Model/Claim.lean         agreement, adjudication, settle once
   RSure/Model/Variance.lean      variance identity, derived rate, gap, loaded premium
+  RSure/Model/Curve.lean         risk-curve delta, reflection/shift invariance, signal nonce
   RSure/Model/Oracle.lean        decide/execute/close
   RSure/Model/Books.lean         unique registration and lookup
   RSure/Model/System.lean        settlement composition and two-cell atomicity
@@ -105,6 +111,7 @@ spec/lean/
 | INV-11 | Atomicity | partial | `system_step_atomic`; native ERTP is assumed |
 | INV-12 | Pause does not block settlement | tool | `tools/check_pause_scope.py` |
 | INV-13 | Variance is risk | covered (estimator boundary) | `risk_is_variance`, `qualityVariance_le`, `loadedPremium_ge_expected`, `gapFlag_sound` |
+| INV-14 | Curve delta is a signal | model-only (curve boundary) | `relativeVarianceGap_reflect`, `relativeVarianceGap_shift`, `signalPut_same`, `signalPut_stale`, `signalPut_replace` |
 
 F-020 and F-021 are fixed: the payable is the documented three-way minimum, the
 aggregate guard propagates through Policy settlement, and terminal claim states are

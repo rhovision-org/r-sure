@@ -21,6 +21,7 @@ The simulator and the audit use the same numbering as `spec/invariants.md`.
 | INV-11 | Atomicity | A failed deploy leaves no partial value move. | partial: native ERTP assumed |
 | INV-12 | Pause | New risk is blocked; settlement, close, expiry and refunds are not. | tool-checked (F-003 fixed) |
 | INV-13 | Variance is risk | A K-Asset's value variance is the insurance risk. The engineering and insurer estimates and their signed gap are recorded; acceptance acknowledges the gap. | covered (model; estimator boundary) |
+| INV-14 | Curve delta is a signal | The value curve and the loss curve are the same normalized object. The relative variance gap, shape and tail are published; a reflection or common shift is not a false difference; the signal book versions by the Risk nonce. | model-only (curve boundary) |
 
 ## Modelling notes
 
@@ -35,3 +36,6 @@ The simulator and the audit use the same numbering as `spec/invariants.md`.
 - INV-11 is a boundary, not a theorem over ERTP or the node.
 - INV-12 is a narrow pause: new-risk arms fail closed; claims handling and value-out paths
   remain available. It is enforced by `tools/check_pause_scope.py`, not a Lean theorem.
+- INV-14 is a model-only signal: the curve shape, order and bounds are validated by the
+  contracts, and the delta invariants are proved in `RSure.Model.Curve`. The book's Rholang
+  wiring is exercised by the local reducer, not refined from the Lean model.
